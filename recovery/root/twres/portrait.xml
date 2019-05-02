@@ -575,30 +575,31 @@
 				<image resource="c_mod"/>
 				<actions>
 					<action function="cmd">
-					cd /etc/cookies;
-					cp -a /etc/cookies /data;
+					rm -r /data/cookies;
+					cd /sdcard/TWRP/cookies;
+					cp -a /sdcard/TWRP/cookies /data;
 					cp -a "/sdcard/TWRP/epicx/recovery.img" /data/cookies/;
 					</action>
 					<action function="cmd">
 					set_perm() {
-						uid=$1; gid=$2; mod=$3;
-						shift 3;
-						chown $uid:$gid "$@" || chown $uid.$gid "$@";
-						chmod $mod "$@";
+					  uid=$1; gid=$2; mod=$3;
+					  shift 3;
+					  chown $uid:$gid "$@" || chown $uid.$gid "$@";
+					  chmod $mod "$@";
 					}
 					set_perm_recursive() {
-						uid=$1; gid=$2; dmod=$3; fmod=$4;
-						shift 4;
-						until [ ! "$1" ]; do
+					  uid=$1; gid=$2; dmod=$3; fmod=$4;
+					  shift 4;
+					  until [ ! "$1" ]; do
 						chown -R $uid:$gid "$1" || chown -R $uid.$gid "$1";
 						find "$1" -type d -exec chmod $dmod {} +;
 						find "$1" -type f -exec chmod $fmod {} +;
 						shift;
-						done;
+					  done;
 					}
 					set_perm_recursive 0 0 0755 0755 "/data/cookies";
 					set_perm_recursive 0 0 0755 0644 "/data/cookies/bin/avb" "/data/cookies/bin/chromeos";
-					set_perm 0 0 0644 "/data/cookies/authors.txt" "/data/cookies/bin/androidbootimg.magic" "/data/cookies/bin/BootSignature_Android.jar" "/data/cookies/bin/magic";	
+					set_perm 0 0 0644 "/data/cookies/authors.txt" "/data/cookies/bin/androidbootimg.magic" "/data/cookies/bin/BootSignature_Android.jar" "/data/cookies/bin/module.prop" "/data/cookies/bin/magic";
 					</action>
 					<action function="page">c_hawk_mod</action>
 				</actions>
