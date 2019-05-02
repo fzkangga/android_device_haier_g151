@@ -648,7 +648,7 @@
 			</image>
 			<text color="%c_grey%">
 				<font resource="font_m"/>
-				<text>%tw_version% shrp | RN5P\Whyred</text>
+				<text>%tw_version% shrp</text>
 				<placement x="376" y="1352"/>
 			</text>
 		</page>
