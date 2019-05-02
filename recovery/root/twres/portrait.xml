@@ -3525,9 +3525,7 @@
 				<actions>
 					<action function="set">c_flashlight_triger=1</action>
 					<action function="cmd">
-					echo 200 > /sys/class/leds/led:torch_0/brightness
-					echo 200 > /sys/class/leds/led:torch_1/brightness
-					echo 1 > /sys/class/leds/led:switch_0/brightness
+					echo 200 > /sys/class/leds/torch-light0/brightness
 					</action>
 				</actions>
 			</button>
@@ -3538,9 +3536,7 @@
 				<actions>
 					<action function="set">c_flashlight_triger=0</action>
 					<action function="cmd">
-					echo 0 > /sys/class/leds/led:torch_0/brightness
-					echo 0 > /sys/class/leds/led:torch_1/brightness
-					echo 0 > /sys/class/leds/led:switch_0/brightness
+					echo 0 > /sys/class/leds/torch-light0/brightness
 					</action>
 				</actions>
 			</button>
