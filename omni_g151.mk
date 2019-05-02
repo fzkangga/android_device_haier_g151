@@ -26,3 +26,5 @@ PRODUCT_MANUFACTURER := Haier
 # Explicitly
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware.keystore=msm8909
+
+ALLOW_MISSING_DEPENDENCIES := true
