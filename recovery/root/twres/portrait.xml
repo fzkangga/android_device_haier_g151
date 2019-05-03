@@ -2969,7 +2969,7 @@
 					mv /magisk/.core /tmp/;
 					mv /magisk/lost+found /tmp/;
 					</action>
-					<action function="page">c_magisk_bhosdk</action>
+					<action function="page">c_magisk.zip_bhosdk</action>
 				</actions>
 			</button-->
 			<action>
@@ -4193,7 +4193,7 @@
 				<text>{@c_root=Root}</text>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/c_supersu</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/c_supersu.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4209,7 +4209,7 @@
 				<text>{@c_unroot=Unroot}</text>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/unsu</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/unsu.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4247,7 +4247,7 @@
 				<text>{@c_root=Root}</text>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/c_magisk</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/c_magisk.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4262,7 +4262,7 @@
 				<text>{@c_unroot=Unroot}</text>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/unmagisk</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/unmagisk.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4300,7 +4300,7 @@
 				<text>{@c_on=ON}</text>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/api2on</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/api2on.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4316,7 +4316,7 @@
 				<text>{@c_off=OFF}</text>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/api2off</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/api2off.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4354,7 +4354,7 @@
 				<image resource="c_ok"/>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/rfp</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/rfp.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -4449,7 +4449,7 @@
 				<image resource="c_ok"/>
 				<actions>
 					<action function="set">tw_back=main2</action>
-					<action function="set">tw_filename=/sdcard/TWRP/epicx/c_viper</action>
+					<action function="set">tw_filename=/sdcard/TWRP/epicx/c_viper.zip</action>
 					<action function="set">tw_action=queuezip</action>
 					<action function="set">tw_has_action2=1</action>
 					<action function="set">tw_action2=flash</action>
@@ -6630,7 +6630,7 @@
 			</action>
 		</page>
 		<!--epicX_magisk_manager>
-		<page name="c_magisk_bhosdk">
+		<page name="c_magisk.zip_bhosdk">
 			<template name="c_page"/>
 			<text style="c_main_text_header">
 				<placement x="55" y="24"/>
@@ -6640,9 +6640,9 @@
 				<placement x="48" y="153" w="1032" h="1320"/>
 				<sort name="tw_gui_sort_order"/>
 				<filter folders="1" files="0"/>
-				<path name="c_magisk_path" default="/magisk/"/>
-				<data name="c_magisk_module_name"/>
-				<selection name="c_magisk_name"/>
+				<path name="c_magisk.zip_path" default="/magisk/"/>
+				<data name="c_magisk.zip_module_name"/>
+				<selection name="c_magisk.zip_name"/>
 			</fileselector>
 			<fill color="%c_white%">
 				<placement x="0" y="153" w="1080" h="100"/>
