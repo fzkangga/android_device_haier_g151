@@ -64,7 +64,7 @@ TARGET_RECOVERY_QCOM_RTC_FIX := true
 # TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/msm_hsusb/gadget/lun1/file
 
 # TWRP
-TW_DEVICE_VERSION := ARM-A16C3H
+# TW_DEVICE_VERSION := ARM-A16C3H
 TW_THEME := portrait_hdpi
 TW_BRIGHTNESS_PATH := /sys/class/leds/lcd-backlight/brightness
 TW_EXCLUDE_SUPERSU := true
@@ -76,3 +76,8 @@ TW_EXCLUDE_SUPERSU := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_USE_TOOLBOX := true
 TW_CRYPTO_USE_SBIN_VOLD := true
+TW_INCLUDE_REPACKTOOLS := true
+
+#SHRP
+SHRP_DEVICE := ARM-A16C3H
+SHRP_MAINTAINER := fzkdevmod
