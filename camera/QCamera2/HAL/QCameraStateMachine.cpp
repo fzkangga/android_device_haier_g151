@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, The Linux Foundataion. All rights reserved.
+/* Copyright (c) 2012-2015, The Linux Foundataion. All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are
@@ -503,13 +503,9 @@ int32_t QCameraStateMachine::procEvtPreviewStoppedState(qcamera_sm_evt_enum_t ev
             m_parent->signalAPIResult(&result);
         }
         break;
-    case QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME:
-        {
-            ALOGW("Free video handle %d %d", evt, m_state);
-            QCameraVideoMemory::closeNativeHandle((const void *)payload);
-        }
     case QCAMERA_SM_EVT_START_RECORDING:
     case QCAMERA_SM_EVT_STOP_RECORDING:
+    case QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME:
     case QCAMERA_SM_EVT_PREPARE_SNAPSHOT:
     case QCAMERA_SM_EVT_TAKE_PICTURE:
         {
@@ -840,17 +836,13 @@ int32_t QCameraStateMachine::procEvtPreviewReadyState(qcamera_sm_evt_enum_t evt,
             m_parent->signalAPIResult(&result);
         }
         break;
-    case QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME:
-        {
-            ALOGW("Free video handle %d %d", evt, m_state);
-            QCameraVideoMemory::closeNativeHandle((const void *)payload);
-        }
     case QCAMERA_SM_EVT_START_NODISPLAY_PREVIEW:
     case QCAMERA_SM_EVT_START_RECORDING:
     case QCAMERA_SM_EVT_STOP_RECORDING:
     case QCAMERA_SM_EVT_PREPARE_SNAPSHOT:
     case QCAMERA_SM_EVT_TAKE_PICTURE:
     case QCAMERA_SM_EVT_CANCEL_PICTURE:
+    case QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME:
     case QCAMERA_SM_EVT_RELEASE:
         {
             ALOGE("%s: cannot handle evt(%d) in state(%d)", __func__, evt, m_state);
@@ -1191,6 +1183,7 @@ int32_t QCameraStateMachine::procEvtPreviewingState(qcamera_sm_evt_enum_t evt,
             rc = m_parent->sendCommand(cmd_payload->cmd,
                                        cmd_payload->arg1,
                                        cmd_payload->arg2);
+#ifndef VANILLA_HAL
             if (CAMERA_CMD_LONGSHOT_ON == cmd_payload->cmd) {
                 if (QCAMERA_SM_EVT_RESTART_PERVIEW == cmd_payload->arg1) {
                     m_parent->stopPreview();
@@ -1206,6 +1199,7 @@ int32_t QCameraStateMachine::procEvtPreviewingState(qcamera_sm_evt_enum_t evt,
                     }
                 }
             }
+#endif
             result.status = rc;
             result.request_api = evt;
             result.result_type = QCAMERA_API_RESULT_TYPE_DEF;
@@ -1227,13 +1221,9 @@ int32_t QCameraStateMachine::procEvtPreviewingState(qcamera_sm_evt_enum_t evt,
             m_parent->signalAPIResult(&result);
         }
         break;
-    case QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME:
-        {
-            ALOGW("Free video handle %d %d", evt, m_state);
-            QCameraVideoMemory::closeNativeHandle((const void *)payload);
-        }
     case QCAMERA_SM_EVT_CANCEL_PICTURE:
     case QCAMERA_SM_EVT_STOP_RECORDING:
+    case QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME:
     case QCAMERA_SM_EVT_RELEASE:
         {
             ALOGE("%s: cannot handle evt(%d) in state(%d)", __func__, evt, m_state);
@@ -1663,10 +1653,12 @@ int32_t QCameraStateMachine::procEvtPicTakingState(qcamera_sm_evt_enum_t evt,
             rc = m_parent->sendCommand(cmd_payload->cmd,
                                        cmd_payload->arg1,
                                        cmd_payload->arg2);
+#ifndef VANILLA_HAL
             if ( CAMERA_CMD_LONGSHOT_OFF == cmd_payload->cmd ) {
                 // move state to previewing state
                 m_state = QCAMERA_SM_STATE_PREVIEWING;
             }
+#endif
             result.status = rc;
             result.request_api = evt;
             result.result_type = QCAMERA_API_RESULT_TYPE_DEF;
@@ -2744,10 +2736,12 @@ int32_t QCameraStateMachine::procEvtPreviewPicTakingState(qcamera_sm_evt_enum_t 
             rc = m_parent->sendCommand(cmd_payload->cmd,
                                        cmd_payload->arg1,
                                        cmd_payload->arg2);
+#ifndef VANILLA_HAL
             if ( CAMERA_CMD_LONGSHOT_OFF == cmd_payload->cmd ) {
                 // move state to previewing state
                 m_state = QCAMERA_SM_STATE_PREVIEWING;
             }
+#endif
             result.status = rc;
             result.request_api = evt;
             result.result_type = QCAMERA_API_RESULT_TYPE_DEF;
@@ -2912,10 +2906,7 @@ int32_t QCameraStateMachine::procEvtPreviewPicTakingState(qcamera_sm_evt_enum_t 
                         if(!m_parent->m_postprocessor.getMultipleStages()) {
                             m_parent->m_postprocessor.setMultipleStages(true);
                         }
-                        if (!m_parent->isLongshotSnapLimited() &&
-                            !m_parent->isCaptureShutterEnabled()) {
-                            m_parent->playShutter();
-                        }
+                        m_parent->playShutter();
                     }
                 }
                 break;
@@ -2990,6 +2981,26 @@ bool QCameraStateMachine::isPreviewRunning()
     case QCAMERA_SM_STATE_VIDEO_PIC_TAKING:
     case QCAMERA_SM_STATE_PREVIEW_PIC_TAKING:
     case QCAMERA_SM_STATE_PREPARE_SNAPSHOT:
+    case QCAMERA_SM_STATE_PREVIEW_READY:
+        return true;
+    default:
+        return false;
+    }
+}
+
+/*===========================================================================
+ * FUNCTION   : isPreviewReady
+ *
+ * DESCRIPTION: check if preview is in ready state.
+ *
+ * PARAMETERS : None
+ *
+ * RETURN     : true -- preview is in ready state
+ *              false -- preview is stopped
+ *==========================================================================*/
+bool QCameraStateMachine::isPreviewReady()
+{
+    switch (m_state) {
     case QCAMERA_SM_STATE_PREVIEW_READY:
         return true;
     default:

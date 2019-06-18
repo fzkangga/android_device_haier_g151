@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2016, The Linux Foundataion. All rights reserved.
+/* Copyright (c) 2012-2015, The Linux Foundataion. All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are
@@ -59,37 +59,38 @@ qcamera_saved_sizes_list savedSizes[MM_CAMERA_MAX_NUM_SENSORS];
 
 static pthread_mutex_t g_camlock = PTHREAD_MUTEX_INITIALIZER;
 volatile uint32_t gCamHalLogLevel = 0;
+unsigned int QCamera2HardwareInterface::mCameraSessionActive = 0;
 
 camera_device_ops_t QCamera2HardwareInterface::mCameraOps = {
-    set_preview_window:         QCamera2HardwareInterface::set_preview_window,
-    set_callbacks:              QCamera2HardwareInterface::set_CallBacks,
-    enable_msg_type:            QCamera2HardwareInterface::enable_msg_type,
-    disable_msg_type:           QCamera2HardwareInterface::disable_msg_type,
-    msg_type_enabled:           QCamera2HardwareInterface::msg_type_enabled,
+    .set_preview_window =         QCamera2HardwareInterface::set_preview_window,
+    .set_callbacks =              QCamera2HardwareInterface::set_CallBacks,
+    .enable_msg_type =            QCamera2HardwareInterface::enable_msg_type,
+    .disable_msg_type =           QCamera2HardwareInterface::disable_msg_type,
+    .msg_type_enabled =           QCamera2HardwareInterface::msg_type_enabled,
 
-    start_preview:              QCamera2HardwareInterface::start_preview,
-    stop_preview:               QCamera2HardwareInterface::stop_preview,
-    preview_enabled:            QCamera2HardwareInterface::preview_enabled,
-    store_meta_data_in_buffers: QCamera2HardwareInterface::store_meta_data_in_buffers,
+    .start_preview =              QCamera2HardwareInterface::start_preview,
+    .stop_preview =               QCamera2HardwareInterface::stop_preview,
+    .preview_enabled =            QCamera2HardwareInterface::preview_enabled,
+    .store_meta_data_in_buffers = QCamera2HardwareInterface::store_meta_data_in_buffers,
 
-    start_recording:            QCamera2HardwareInterface::start_recording,
-    stop_recording:             QCamera2HardwareInterface::stop_recording,
-    recording_enabled:          QCamera2HardwareInterface::recording_enabled,
-    release_recording_frame:    QCamera2HardwareInterface::release_recording_frame,
+    .start_recording =            QCamera2HardwareInterface::start_recording,
+    .stop_recording =             QCamera2HardwareInterface::stop_recording,
+    .recording_enabled =          QCamera2HardwareInterface::recording_enabled,
+    .release_recording_frame =    QCamera2HardwareInterface::release_recording_frame,
 
-    auto_focus:                 QCamera2HardwareInterface::auto_focus,
-    cancel_auto_focus:          QCamera2HardwareInterface::cancel_auto_focus,
+    .auto_focus =                 QCamera2HardwareInterface::auto_focus,
+    .cancel_auto_focus =          QCamera2HardwareInterface::cancel_auto_focus,
 
-    take_picture:               QCamera2HardwareInterface::take_picture,
-    cancel_picture:             QCamera2HardwareInterface::cancel_picture,
+    .take_picture =               QCamera2HardwareInterface::take_picture,
+    .cancel_picture =             QCamera2HardwareInterface::cancel_picture,
 
-    set_parameters:             QCamera2HardwareInterface::set_parameters,
-    get_parameters:             QCamera2HardwareInterface::get_parameters,
-    put_parameters:             QCamera2HardwareInterface::put_parameters,
-    send_command:               QCamera2HardwareInterface::send_command,
+    .set_parameters =             QCamera2HardwareInterface::set_parameters,
+    .get_parameters =            QCamera2HardwareInterface::get_parameters,
+    .put_parameters =             QCamera2HardwareInterface::put_parameters,
+    .send_command =               QCamera2HardwareInterface::send_command,
 
-    release:                    QCamera2HardwareInterface::release,
-    dump:                       QCamera2HardwareInterface::dump,
+    .release =                    QCamera2HardwareInterface::release,
+    .dump =                       QCamera2HardwareInterface::dump,
 };
 
 /*===========================================================================
@@ -520,7 +521,6 @@ int QCamera2HardwareInterface::recording_enabled(struct camera_device *device)
 void QCamera2HardwareInterface::release_recording_frame(
             struct camera_device *device, const void *opaque)
 {
-    int32_t ret = NO_ERROR;
     ATRACE_CALL();
     QCamera2HardwareInterface *hw =
         reinterpret_cast<QCamera2HardwareInterface *>(device->priv);
@@ -533,21 +533,9 @@ void QCamera2HardwareInterface::release_recording_frame(
         return;
     }
     CDBG("%s: E", __func__);
-
-    //Close and delete duplicated native handle and FD's
-    if ((hw->mVideoMem != NULL)&&(hw->mStoreMetaDataInFrame>0)) {
-        ret = hw->mVideoMem->closeNativeHandle(opaque,TRUE);
-        if (ret != NO_ERROR) {
-            ALOGE("Invalid video metadata");
-            return;
-        }
-    } else {
-        ALOGW("Possible FD leak. Release recording called after stop");
-    }
-
     hw->lockAPI();
     qcamera_api_result_t apiResult;
-    ret = hw->processAPI(QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME, (void *)opaque);
+    int32_t ret = hw->processAPI(QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME, (void *)opaque);
     if (ret == NO_ERROR) {
         hw->waitAPIResult(QCAMERA_SM_EVT_RELEASE_RECORIDNG_FRAME, &apiResult);
     }
@@ -674,6 +662,7 @@ int QCamera2HardwareInterface::take_picture(struct camera_device *device)
     }
 
     hw->unlockAPI();
+    hw->mLastCaptureTime = systemTime();
     CDBG_HIGH("[KPI Perf] %s: X", __func__);
     return ret;
 }
@@ -930,6 +919,9 @@ int QCamera2HardwareInterface::close_camera_device(hw_device_t *hw_dev)
     }
     delete hw;
 
+    pthread_mutex_lock(&g_camlock);
+    mCameraSessionActive = 0;
+    pthread_mutex_unlock(&g_camlock);
     CDBG_HIGH("[KPI Perf] %s: X",__func__);
     return ret;
 }
@@ -994,7 +986,6 @@ QCamera2HardwareInterface::QCamera2HardwareInterface(uint32_t cameraId)
       mMsgEnabled(0),
       mStoreMetaDataInFrame(0),
       m_stateMachine(this),
-      m_smThreadActive(true),
       m_postprocessor(this),
       m_thermalAdapter(QCameraThermalAdapter::getInstance()),
       m_cbNotifier(this),
@@ -1029,9 +1020,10 @@ QCamera2HardwareInterface::QCamera2HardwareInterface(uint32_t cameraId)
       mRawdataJob(-1),
       mPreviewFrameSkipValid(0),
       mNumPreviewFaces(-1),
+      mLastAFScanTime(0),
+      mLastCaptureTime(0),
       mAdvancedCaptureConfigured(false),
-      mFPSReconfigure(false),
-      mVideoMem(NULL)
+      mFPSReconfigure(false)
 {
 #ifdef TARGET_TS_MAKEUP
     mMakeUpBuf = NULL;
@@ -1098,11 +1090,8 @@ QCamera2HardwareInterface::~QCamera2HardwareInterface()
     mDefferedWorkThread.sendCmd(CAMERA_CMD_TYPE_STOP_DATA_PROC, TRUE, TRUE);
     mDefferedWorkThread.exit();
 
-    lockAPI();
-    m_smThreadActive = false;
-    unlockAPI();
-    m_stateMachine.releaseThread();
     closeCamera();
+    m_stateMachine.releaseThread();
     pthread_mutex_destroy(&m_lock);
     pthread_cond_destroy(&m_cond);
     pthread_mutex_destroy(&m_evtLock);
@@ -1128,10 +1117,15 @@ int QCamera2HardwareInterface::openCamera(struct hw_device_t **hw_device)
     ATRACE_CALL();
     int rc = NO_ERROR;
 
-    if (!check_cam_access(mCameraId)) {
+    pthread_mutex_lock(&g_camlock);
+    // if mCameraSessionActive is 1 then return EUSERS to indicate MAX_CAMERAS_IN_USE to APP
+    // TODO: This needs to be replaced by checking SENSOR combination & Number of VFE's
+    if (mCameraSessionActive) {
         ALOGE("%s: multiple simultaneous camera instance not supported", __func__);
+        pthread_mutex_unlock(&g_camlock);
         return -EUSERS;
     }
+    pthread_mutex_unlock(&g_camlock);
 
     if (mCameraOpened) {
         *hw_device = NULL;
@@ -1141,9 +1135,14 @@ int QCamera2HardwareInterface::openCamera(struct hw_device_t **hw_device)
     rc = openCamera();
     if (rc == NO_ERROR){
         *hw_device = &mCameraDevice.common;
+        pthread_mutex_lock(&g_camlock);
+        mCameraSessionActive = 1;
+        pthread_mutex_unlock(&g_camlock);
+/*
         if (m_thermalAdapter.init(this) != 0) {
           ALOGE("Init thermal adapter failed");
         }
+*/
     }
     else
         *hw_device = NULL;
@@ -1279,6 +1278,11 @@ int QCamera2HardwareInterface::openCamera()
         gCamCapability[mCameraId]->padding_info.plane_padding = padding_info.plane_padding;
     }
 
+    // Hard-code padding for OnePlus X
+    gCamCapability[mCameraId]->padding_info.width_padding = CAM_PAD_TO_64;
+    gCamCapability[mCameraId]->padding_info.height_padding = CAM_PAD_TO_64;
+    gCamCapability[mCameraId]->padding_info.plane_padding = CAM_PAD_TO_64;
+
     mParameters.init(gCamCapability[mCameraId], mCameraHandle, this, this);
 
     mCameraOpened = true;
@@ -1323,7 +1327,7 @@ int QCamera2HardwareInterface::closeCamera()
     m_postprocessor.stop();
     m_postprocessor.deinit();
 
-    m_thermalAdapter.deinit();
+    //m_thermalAdapter.deinit();
 
     // delete all channels if not already deleted
     for (i = 0; i < QCAMERA_CH_TYPE_MAX; i++) {
@@ -1472,7 +1476,8 @@ int QCamera2HardwareInterface::prepareTorchCamera()
     int rc = NO_ERROR;
 
     if ( ( !m_stateMachine.isPreviewRunning() ) &&
-         ( m_channels[QCAMERA_CH_TYPE_PREVIEW] == NULL ) ) {
+            !m_stateMachine.isPreviewReady() &&
+            ( m_channels[QCAMERA_CH_TYPE_PREVIEW] == NULL ) ) {
         rc = addChannel(QCAMERA_CH_TYPE_PREVIEW);
         waitDefferedWork(mMetadataJob);
     }
@@ -1495,7 +1500,8 @@ int QCamera2HardwareInterface::prepareTorchCamera()
 int QCamera2HardwareInterface::releaseTorchCamera()
 {
     if ( !m_stateMachine.isPreviewRunning() &&
-         ( m_channels[QCAMERA_CH_TYPE_PREVIEW] != NULL ) ) {
+            !m_stateMachine.isPreviewReady() &&
+            ( m_channels[QCAMERA_CH_TYPE_PREVIEW] != NULL ) ) {
         delete m_channels[QCAMERA_CH_TYPE_PREVIEW];
         m_channels[QCAMERA_CH_TYPE_PREVIEW] = NULL;
     }
@@ -1558,14 +1564,12 @@ uint8_t QCamera2HardwareInterface::getBufNumRequired(cam_stream_type_t stream_ty
                   with number being 'zslQBuffers + minCircularBufNum'
                   we see preview buffers sometimes get dropped at CPP
                   and super buf is not forming in ZSL Q for long time. */
+
                 bufferCnt = zslQBuffers + minCircularBufNum +
                         mParameters.getNumOfExtraBuffersForImageProc() +
                         EXTRA_ZSL_PREVIEW_STREAM_BUF +
                         mParameters.getNumOfExtraBuffersForPreview() +
                         mParameters.getNumOfExtraHDRInBufsIfNeeded();
-                if (isLongshotSnapLimited() && mLongshotEnabled) {
-                    bufferCnt = mParameters.getNumOfBuffersForLongshotLimitedMode();
-                }
             } else {
                 bufferCnt = CAMERA_MIN_STREAMING_BUFFERS +
                         mParameters.getMaxUnmatchedFramesInQueue() +
@@ -1594,7 +1598,7 @@ uint8_t QCamera2HardwareInterface::getBufNumRequired(cam_stream_type_t stream_ty
                 if (minCaptureBuffers == 1 && !mLongshotEnabled) {
                     // Single ZSL snapshot case
                     bufferCnt = zslQBuffers + CAMERA_MIN_STREAMING_BUFFERS +
-                            mParameters.getNumOfExtraBuffersForImageProc() +
+			    mParameters.getNumOfExtraBuffersForImageProc() +
                             mParameters.getNumOfExtraHDRInBufsIfNeeded();
                 }
                 else {
@@ -1602,9 +1606,6 @@ uint8_t QCamera2HardwareInterface::getBufNumRequired(cam_stream_type_t stream_ty
                     bufferCnt = zslQBuffers + minCircularBufNum +
                             mParameters.getNumOfExtraBuffersForImageProc() +
                             mParameters.getNumOfExtraHDRInBufsIfNeeded();
-                    if (isLongshotSnapLimited() && mLongshotEnabled) {
-                        bufferCnt = mParameters.getNumOfBuffersForLongshotLimitedMode();
-                    }
                 }
                 if (getSensorType() == CAM_SENSOR_YUV &&
                     !gCamCapability[mCameraId]->use_pix_for_SOC) {
@@ -1668,9 +1669,6 @@ uint8_t QCamera2HardwareInterface::getBufNumRequired(cam_stream_type_t stream_ty
             }
             if (bufferCnt > maxStreamBuf) {
                 bufferCnt = maxStreamBuf;
-            }
-            if (mParameters.isZSLMode() && isLongshotSnapLimited() && mLongshotEnabled) {
-                bufferCnt = mParameters.getNumOfBuffersForLongshotLimitedMode();
             }
             bufferCnt += minUndequeCount;
         }
@@ -1793,9 +1791,7 @@ QCameraMemory *QCamera2HardwareInterface::allocateStreamBuf(
             bCachedMem = mParameters.isVideoBuffersCached();
             CDBG_HIGH("%s: %s video buf allocated ", __func__,
                     (bCachedMem == 0) ? "Uncached" : "Cached" );
-            QCameraVideoMemory *videoMemory = new QCameraVideoMemory(mGetMemory, bCachedMem);
-            mem = videoMemory;
-            mVideoMem = videoMemory;
+            mem = new QCameraVideoMemory(mGetMemory, bCachedMem);
         }
         break;
     case CAM_STREAM_TYPE_DEFAULT:
@@ -2188,7 +2184,6 @@ int QCamera2HardwareInterface::startRecording()
 {
     int32_t rc = NO_ERROR;
     CDBG_HIGH("%s: E", __func__);
-    mVideoMem = NULL;
     if (mParameters.getRecordingHintValue() == false) {
         CDBG_HIGH("%s: start recording when hint is false, stop preview first", __func__);
         stopPreview();
@@ -2262,7 +2257,6 @@ int QCamera2HardwareInterface::stopRecording()
 {
     CDBG_HIGH("%s: E", __func__);
     int rc = stopChannel(QCAMERA_CH_TYPE_VIDEO);
-    m_cbNotifier.flushVideoNotifications();
 
 #ifdef HAS_MULTIMEDIA_HINTS
     if (m_pPowerModule) {
@@ -2271,7 +2265,6 @@ int QCamera2HardwareInterface::stopRecording()
         }
     }
 #endif
-    mVideoMem = NULL;
     CDBG_HIGH("%s: X", __func__);
     return rc;
 }
@@ -3170,6 +3163,7 @@ int QCamera2HardwareInterface::cancelPicture()
     unconfigureAdvancedCapture();
 
     mParameters.setDisplayFrame(TRUE);
+
     if (mParameters.isZSLMode()) {
         QCameraPicChannel *pZSLChannel =
             (QCameraPicChannel *)m_channels[QCAMERA_CH_TYPE_ZSL];
@@ -3585,6 +3579,7 @@ int QCamera2HardwareInterface::sendCommand(int32_t command,
     int rc = NO_ERROR;
 
     switch (command) {
+#ifndef VANILLA_HAL
     case CAMERA_CMD_LONGSHOT_ON:
         arg1 = 0;
         // Longshot can only be enabled when image capture
@@ -3630,8 +3625,6 @@ int QCamera2HardwareInterface::sendCommand(int32_t command,
         }
         break;
     case CAMERA_CMD_LONGSHOT_OFF:
-        /* Longshot off command is sent after receiving all JPEG CB's
-           for the issued TakePictures()*/
         if ( mLongshotEnabled && m_stateMachine.isCaptureRunning() ) {
             cancelPicture();
             processEvt(QCAMERA_SM_EVT_SNAPSHOT_DONE, NULL);
@@ -3647,32 +3640,22 @@ int QCamera2HardwareInterface::sendCommand(int32_t command,
         mLongshotEnabled = false;
         rc = mParameters.setLongshotEnable(mLongshotEnabled);
         break;
-    case CAMERA_CMD_STOP_LONGSHOT:
-         /*Stop command is sent after receiving all the required YUV
-           callbacks or releasing the shutter before reaching Max number*/
-        if (mLongshotEnabled && m_stateMachine.isCaptureRunning() &&
-            isLongshotSnapLimited()) {
-            QCameraChannel *pZSLChannel = m_channels[QCAMERA_CH_TYPE_ZSL];
-            CDBG_HIGH("%s: CAMERA_CMD_STOP_LONGSHOT", __func__);
-            if (isZSLMode() && (NULL != pZSLChannel) && mPrepSnapRun)
-                mCameraHandle->ops->stop_zsl_snapshot(
-                        mCameraHandle->camera_handle,
-                        pZSLChannel->getMyHandle());
-            }
-        break;
     case CAMERA_CMD_HISTOGRAM_ON:
     case CAMERA_CMD_HISTOGRAM_OFF:
         rc = setHistogram(command == CAMERA_CMD_HISTOGRAM_ON? true : false);
         CDBG_HIGH("%s: Histogram -> %s", __func__,
               mParameters.isHistogramEnabled() ? "Enabled" : "Disabled");
         break;
+#endif
     case CAMERA_CMD_START_FACE_DETECTION:
     case CAMERA_CMD_STOP_FACE_DETECTION:
         rc = setFaceDetection(command == CAMERA_CMD_START_FACE_DETECTION? true : false);
         CDBG_HIGH("%s: FaceDetection -> %s", __func__,
               mParameters.isFaceDetectionEnabled() ? "Enabled" : "Disabled");
         break;
+#ifndef VANILLA_HAL
     case CAMERA_CMD_HISTOGRAM_SEND_DATA:
+#endif
     default:
         rc = NO_ERROR;
         break;
@@ -3827,13 +3810,7 @@ int QCamera2HardwareInterface::dump(int /*fd*/)
  *==========================================================================*/
 int QCamera2HardwareInterface::processAPI(qcamera_sm_evt_enum_t api, void *api_payload)
 {
-    int ret = DEAD_OBJECT;
-
-    if (m_smThreadActive) {
-        ret = m_stateMachine.procAPI(api, api_payload);
-    }
-
-    return ret;
+    return m_stateMachine.procAPI(api, api_payload);
 }
 
 /*===========================================================================
@@ -4213,6 +4190,7 @@ int32_t QCamera2HardwareInterface::processHDRData(cam_asd_hdr_scene_data_t hdr_s
 {
     int rc = NO_ERROR;
 
+#ifndef VANILLA_HAL
     if (hdr_scene.is_hdr_scene &&
       (hdr_scene.hdr_confidence > HDR_CONFIDENCE_THRESHOLD) &&
       mParameters.isAutoHDREnabled()) {
@@ -4265,11 +4243,11 @@ int32_t QCamera2HardwareInterface::processHDRData(cam_asd_hdr_scene_data_t hdr_s
         }
     }
 
-    CDBG("%s : hdr_scene_data: processHDRData: %d %f",
+    ALOGD("%s : hdr_scene_data: processHDRData: %d %f",
           __func__,
           hdr_scene.is_hdr_scene,
           hdr_scene.hdr_confidence);
-
+#endif
   return rc;
 }
 
@@ -4332,6 +4310,8 @@ int32_t QCamera2HardwareInterface::processPrepSnapshotDoneEvent(
  *==========================================================================*/
 int32_t QCamera2HardwareInterface::processASDUpdate(cam_auto_scene_t scene)
 {
+
+#ifndef VANILLA_HAL
     //set ASD parameter
     mParameters.set(QCameraParameters::KEY_SELECTED_AUTO_SCENE, mParameters.getASDStateString(scene));
 
@@ -4371,6 +4351,7 @@ int32_t QCamera2HardwareInterface::processASDUpdate(cam_auto_scene_t scene)
         ALOGE("%s: fail sending notification", __func__);
         asdBuffer->release(asdBuffer);
     }
+#endif
     return NO_ERROR;
 
 }
@@ -5580,15 +5561,19 @@ int32_t QCamera2HardwareInterface::preparePreview()
         if(recordingHint) {
             //stop face detection,longshot,etc if turned ON in Camera mode
             int32_t arg; //dummy arg
+#ifndef VANILLA_HAL
             if (isLongshotEnabled()) {
                 sendCommand(CAMERA_CMD_LONGSHOT_OFF, arg, arg);
             }
+#endif
             if (mParameters.isFaceDetectionEnabled()) {
                 sendCommand(CAMERA_CMD_STOP_FACE_DETECTION, arg, arg);
             }
+#ifndef VANILLA_HAL
             if (mParameters.isHistogramEnabled()) {
                 sendCommand(CAMERA_CMD_HISTOGRAM_OFF, arg, arg);
             }
+#endif
 
             cam_dimension_t videoSize;
             mParameters.getVideoSize(&videoSize.width, &videoSize.height);
@@ -5729,7 +5714,11 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
     if ((NULL == mDataCb) ||
         (fd_type == QCAMERA_FD_PREVIEW && (!msgTypeEnabled(CAMERA_MSG_PREVIEW_METADATA) ||
         (!needPreviewFDCallback(fd_data->num_faces_detected)))) ||
+#ifndef VANILLA_HAL
         (fd_type == QCAMERA_FD_SNAPSHOT && !msgTypeEnabled(CAMERA_MSG_META_DATA))
+#else
+	(fd_type == QCAMERA_FD_SNAPSHOT)
+#endif
         ) {
         CDBG_HIGH("%s: metadata msgtype not enabled, no ops here", __func__);
         return NO_ERROR;
@@ -5752,6 +5741,7 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
         faceResultSize = sizeof(camera_frame_metadata_t);
         faceResultSize += sizeof(camera_face_t) * MAX_ROI;
     }else if(fd_type == QCAMERA_FD_SNAPSHOT){
+#ifndef VANILLA_HAL
         // fd for snapshot frames
         //check if face is detected in this frame
         if(fd_data->num_faces_detected > 0){
@@ -5761,6 +5751,7 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
             //no face
             data_len = 0;
         }
+#endif
         faceResultSize = 1 *sizeof(int)    //meta data type
                        + 1 *sizeof(int)    // meta data len
                        + data_len;         //data
@@ -5783,6 +5774,7 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
         faceData = pFaceResult;
         mNumPreviewFaces = fd_data->num_faces_detected;
     }else if(fd_type == QCAMERA_FD_SNAPSHOT){
+#ifndef VANILLA_HAL
         //need fill meta type and meta data len first
         int *data_header = (int* )pFaceResult;
         data_header[0] = CAMERA_META_DATA_FD;
@@ -5807,6 +5799,7 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
         }
 
         faceData = pFaceResult + 2 *sizeof(int); //skip two int length
+#endif
     }
 
     camera_frame_metadata_t *roiData = (camera_frame_metadata_t * ) faceData;
@@ -5861,6 +5854,7 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
             mFaceRect.right = fd_data->faces[i].face_boundary.width+mFaceRect.left;
             mFaceRect.bottom = fd_data->faces[i].face_boundary.height+mFaceRect.top;
 #endif
+#ifndef VANILLA_HAL
             faces[i].smile_degree = fd_data->faces[i].smile_degree;
             faces[i].smile_score = fd_data->faces[i].smile_confidence;
             faces[i].blink_detected = fd_data->faces[i].blink_detected;
@@ -5876,6 +5870,7 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
             faces[i].reye_blink = fd_data->faces[i].right_blink;
             faces[i].left_right_gaze = fd_data->faces[i].left_right_gaze;
             faces[i].top_bottom_gaze = fd_data->faces[i].top_bottom_gaze;
+#endif
 
         }
     }
@@ -5889,9 +5884,12 @@ int32_t QCamera2HardwareInterface::processFaceDetectionResult(cam_face_detection
     cbArg.cb_type = QCAMERA_DATA_CALLBACK;
     if(fd_type == QCAMERA_FD_PREVIEW){
         cbArg.msg_type = CAMERA_MSG_PREVIEW_METADATA;
-    }else if(fd_type == QCAMERA_FD_SNAPSHOT){
+    }
+#ifndef VANILLA_HAL
+    else if(fd_type == QCAMERA_FD_SNAPSHOT){
         cbArg.msg_type = CAMERA_MSG_META_DATA;
     }
+#endif
     cbArg.data = faceResultBuffer;
     cbArg.metadata = roiData;
     cbArg.user_data = faceResultBuffer;
@@ -5967,6 +5965,7 @@ void QCamera2HardwareInterface::returnStreamBuffer(void *data,
  *==========================================================================*/
 int32_t QCamera2HardwareInterface::processHistogramStats(cam_hist_stats_t &stats_data)
 {
+#ifndef VANILLA_HAL
     if (!mParameters.isHistogramEnabled()) {
         CDBG("%s: Histogram not enabled, no ops here", __func__);
         return NO_ERROR;
@@ -6011,6 +6010,9 @@ int32_t QCamera2HardwareInterface::processHistogramStats(cam_hist_stats_t &stats
         histBuffer->release(histBuffer);
     }
     return NO_ERROR;
+#else
+    return NO_ERROR;
+#endif
 }
 
 /*===========================================================================
@@ -7247,12 +7249,14 @@ bool QCamera2HardwareInterface::isRegularCapture()
 {
     bool ret = false;
 
+#if 0
     if (numOfSnapshotsExpected() == 1 &&
         !isLongshotEnabled() &&
         !mParameters.getRecordingHintValue() &&
         !isZSLMode() && !(mParameters.isHDREnabled())) {
             ret = true;
     }
+#endif
     return ret;
 }
 
