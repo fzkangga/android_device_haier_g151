@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2014 The  Linux Foundation. All rights reserved.
+ * Copyright (C) 2014-2015 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +14,12 @@
  * limitations under the License.
  */
 
+
 //#define LOG_NDEBUG 0
 #define LOG_TAG "lights"
 
 #include <cutils/log.h>
-#include <cutils/properties.h>
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -28,7 +28,6 @@
 #include <fcntl.h>
 #include <pthread.h>
 
-#include <sys/ioctl.h>
 #include <sys/types.h>
 
 #include <hardware/lights.h>
@@ -36,10 +35,13 @@
 /******************************************************************************/
 
 static pthread_once_t g_init = PTHREAD_ONCE_INIT;
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t bl_g_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t bt_g_lock = PTHREAD_MUTEX_INITIALIZER;
 
-char const*const LCD_FILE
+const char *const LCD_FILE
         = "/sys/class/leds/lcd-backlight/brightness";
+const char *const BUTTONS_FILE
+        = "/sys/class/leds/button-backlight/brightness";
 
 /**
  * device methods
@@ -47,8 +49,9 @@ char const*const LCD_FILE
 
 void init_globals(void)
 {
-    // init the mutex
-    pthread_mutex_init(&g_lock, NULL);
+    // init the mutexes
+    pthread_mutex_init(&bl_g_lock, NULL);
+    pthread_mutex_init(&bt_g_lock, NULL);
 }
 
 static int
@@ -75,30 +78,48 @@ write_string(const char *path, const char *buffer)
 static int
 write_int(const char *path, int value)
 {
-    char buffer[20];
-    sprintf(buffer, "%d\n", value);
+    char buffer[12];
+    snprintf(buffer, sizeof(buffer), "%d\n", value);
     return write_string(path, buffer);
 }
 
 static int
-rgb_to_brightness(struct light_state_t const* state)
+rgb_to_brightness(const struct light_state_t *state)
 {
     int color = state->color & 0x00ffffff;
     return ((77 * ((color >> 16) & 0xff))
-            + (150*((color >> 8) & 0xff))
+            + (150 * ((color >> 8) & 0xff))
             + (29 * (color & 0xff))) >> 8;
 }
 
 static int
-set_light_backlight(__attribute__ ((unused)) struct light_device_t* dev,
-        struct light_state_t const* state)
+set_light_backlight(__attribute__ ((unused)) struct light_device_t *dev,
+        const struct light_state_t *state)
 {
     int err = 0;
     int brightness = rgb_to_brightness(state);
 
-    pthread_mutex_lock(&g_lock);
+    pthread_mutex_lock(&bl_g_lock);
+
     err = write_int(LCD_FILE, brightness);
-    pthread_mutex_unlock(&g_lock);
+
+    pthread_mutex_unlock(&bl_g_lock);
+
+    return err;
+}
+
+static int
+set_light_buttons(__attribute__ ((unused)) struct light_device_t *dev,
+        const struct light_state_t *state)
+{
+    int err = 0;
+    int brightness = rgb_to_brightness(state);
+
+    pthread_mutex_lock(&bt_g_lock);
+
+    err = write_int(BUTTONS_FILE, brightness);
+
+    pthread_mutex_unlock(&bt_g_lock);
 
     return err;
 }
@@ -113,19 +134,23 @@ close_lights(struct light_device_t *dev)
     return 0;
 }
 
+/******************************************************************************/
+
 /**
  * module methods
  */
 
 /** Open a new instance of a lights device using name */
-static int open_lights(const struct hw_module_t* module, char const* name,
-        struct hw_device_t** device)
+static int open_lights(const struct hw_module_t *module, const char *name,
+        struct hw_device_t **device)
 {
-    int (*set_light)(struct light_device_t* dev,
-            struct light_state_t const* state);
+    int (*set_light)(struct light_device_t *dev,
+            const struct light_state_t *state);
 
     if (0 == strcmp(LIGHT_ID_BACKLIGHT, name))
         set_light = set_light_backlight;
+    else if (0 == strcmp(LIGHT_ID_BUTTONS, name))
+        set_light = set_light_buttons;
     else
         return -EINVAL;
 
@@ -151,13 +176,12 @@ static struct hw_module_methods_t lights_module_methods = {
 /*
  * The lights Module
  */
-
 struct hw_module_t HAL_MODULE_INFO_SYM = {
     .tag = HARDWARE_MODULE_TAG,
     .version_major = 1,
     .version_minor = 0,
     .id = LIGHTS_HARDWARE_MODULE_ID,
-    .name = "Lights Module",
-    .author = "Google, Inc.",
+    .name = "Rendang Lights Module",
+    .author = "The CyanogenMod Project",
     .methods = &lights_module_methods,
 };
