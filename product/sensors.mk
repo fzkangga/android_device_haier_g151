@@ -1,4 +1,4 @@
-# Sensor HAL
+# Sensors
 PRODUCT_PACKAGES += \
     calmodule.cfg \
     libcalmodule_common \

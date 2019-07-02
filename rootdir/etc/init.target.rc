@@ -36,6 +36,34 @@ on boot
     chmod 0664 /sys/class/power_supply/bms/current_now
     chmod 0664 /sys/class/power_supply/bms/voltage_ocv
 
+    # LTR553 light
+    chown system system /sys/class/sensors/ltr553-light/calibrate
+    chown system system /sys/class/sensors/ltr553-light/enable
+    chown system system /sys/class/sensors/ltr553-light/enable_wakeup
+    chown system system /sys/class/sensors/ltr553-light/flush
+    chown system system /sys/class/sensors/ltr553-light/max_latency
+    chown system system /sys/class/sensors/ltr553-light/poll_delay
+    chmod 0660 /sys/class/sensors/ltr553-light/calibrate
+    chmod 0660 /sys/class/sensors/ltr553-light/enable
+    chmod 0660 /sys/class/sensors/ltr553-light/enable_wakeup
+    chmod 0660 /sys/class/sensors/ltr553-light/flush
+    chmod 0660 /sys/class/sensors/ltr553-light/max_latency
+    chmod 0660 /sys/class/sensors/ltr553-light/poll_delay
+
+    # LTR553 proximity
+    chown system system /sys/class/sensors/ltr553-proximity/calibrate
+    chown system system /sys/class/sensors/ltr553-proximity/enable
+    chown system system /sys/class/sensors/ltr553-proximity/enable_wakeup
+    chown system system /sys/class/sensors/ltr553-proximity/flush
+    chown system system /sys/class/sensors/ltr553-proximity/max_latency
+    chown system system /sys/class/sensors/ltr553-proximity/poll_delay
+    chmod 0660 /sys/class/sensors/ltr553-proximity/calibrate
+    chmod 0660 /sys/class/sensors/ltr553-proximity/enable
+    chmod 0660 /sys/class/sensors/ltr553-proximity/enable_wakeup
+    chmod 0660 /sys/class/sensors/ltr553-proximity/flush
+    chmod 0660 /sys/class/sensors/ltr553-proximity/max_latency
+    chmod 0660 /sys/class/sensors/ltr553-proximity/poll_delay
+
     # LEDs
     chown system system /sys/class/leds/red/blink
     chown system system /sys/class/leds/red/led_time
