@@ -106,6 +106,10 @@ int64_t SensorBase::getTimestamp() {
     return int64_t(t.tv_sec)*1000000000LL + t.tv_nsec;
 }
 
+int64_t SensorBase::getClkOffset() {
+    return (getTimestamp() - android::elapsedRealtimeNano());
+}
+
 int SensorBase::openInput(const char* inputName) {
     int fd = -1;
     const char *dirname = "/dev/input";
@@ -209,7 +213,7 @@ int SensorBase::flush(int32_t handle)
          */
 
         /* Should return -EINVAL if the sensor is not enabled */
-        if ((!mEnabled) || (ctx == NULL)) {
+        if ((!mEnabled) || (ctx == NULL) || (ctx->sensor->flags & SENSOR_FLAG_ONE_SHOT_MODE)) {
                 ALOGE("handle:%d mEnabled:%d ctx:%p\n", handle, mEnabled, ctx);
                 return -EINVAL;
         }

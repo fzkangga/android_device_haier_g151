@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
- * Copyright (C) 2014 The  Linux Foundation. All rights reserved.
+ * Copyright (C) 2014-2015 The CyanogenMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +15,12 @@
  */
 
 
-// #define LOG_NDEBUG 0
+//#define LOG_NDEBUG 0
+#define LOG_TAG "lights"
 
 #include <cutils/log.h>
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
@@ -27,7 +28,6 @@
 #include <fcntl.h>
 #include <pthread.h>
 
-#include <sys/ioctl.h>
 #include <sys/types.h>
 
 #include <hardware/lights.h>
@@ -35,12 +35,12 @@
 /******************************************************************************/
 
 static pthread_once_t g_init = PTHREAD_ONCE_INIT;
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t bl_g_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t bt_g_lock = PTHREAD_MUTEX_INITIALIZER;
 
-char const*const LCD_FILE
+const char *const LCD_FILE
         = "/sys/class/leds/lcd-backlight/brightness";
-
-char const*const BUTTON_FILE
+const char *const BUTTONS_FILE
         = "/sys/class/leds/button-backlight/brightness";
 
 /**
@@ -49,26 +49,26 @@ char const*const BUTTON_FILE
 
 void init_globals(void)
 {
-    // init the mutex
-    pthread_mutex_init(&g_lock, NULL);
+    // init the mutexes
+    pthread_mutex_init(&bl_g_lock, NULL);
+    pthread_mutex_init(&bt_g_lock, NULL);
 }
 
 static int
-write_int(char const* path, int value)
+write_string(const char *path, const char *buffer)
 {
     int fd;
     static int already_warned = 0;
 
     fd = open(path, O_RDWR);
     if (fd >= 0) {
-        char buffer[20];
-        int bytes = snprintf(buffer, sizeof(buffer), "%d\n", value);
-        ssize_t amt = write(fd, buffer, (size_t)bytes);
+        int bytes = strlen(buffer);
+        int amt = write(fd, buffer, bytes);
         close(fd);
         return amt == -1 ? -errno : 0;
     } else {
         if (already_warned == 0) {
-            ALOGE("write_int failed to open %s\n", path);
+            ALOGE("write_string failed to open %s (%s)\n", path, strerror(errno));
             already_warned = 1;
         }
         return -errno;
@@ -76,45 +76,51 @@ write_int(char const* path, int value)
 }
 
 static int
-is_lit(struct light_state_t const* state)
+write_int(const char *path, int value)
 {
-    return state->color & 0x00ffffff;
+    char buffer[12];
+    snprintf(buffer, sizeof(buffer), "%d\n", value);
+    return write_string(path, buffer);
 }
 
 static int
-rgb_to_brightness(struct light_state_t const* state)
+rgb_to_brightness(const struct light_state_t *state)
 {
     int color = state->color & 0x00ffffff;
-    return ((77*((color>>16)&0x00ff))
-            + (150*((color>>8)&0x00ff)) + (29*(color&0x00ff))) >> 8;
+    return ((77 * ((color >> 16) & 0xff))
+            + (150 * ((color >> 8) & 0xff))
+            + (29 * (color & 0xff))) >> 8;
 }
 
 static int
-set_light_backlight(struct light_device_t* dev,
-        struct light_state_t const* state)
+set_light_backlight(__attribute__ ((unused)) struct light_device_t *dev,
+        const struct light_state_t *state)
 {
     int err = 0;
     int brightness = rgb_to_brightness(state);
-    if(!dev) {
-        return -1;
-    }
-    pthread_mutex_lock(&g_lock);
+
+    pthread_mutex_lock(&bl_g_lock);
+
     err = write_int(LCD_FILE, brightness);
-    pthread_mutex_unlock(&g_lock);
+
+    pthread_mutex_unlock(&bl_g_lock);
+
     return err;
 }
 
 static int
-set_light_buttons(struct light_device_t* dev,
-        struct light_state_t const* state)
+set_light_buttons(__attribute__ ((unused)) struct light_device_t *dev,
+        const struct light_state_t *state)
 {
     int err = 0;
-    if(!dev) {
-        return -1;
-    }
-    pthread_mutex_lock(&g_lock);
-    err = write_int(BUTTON_FILE, state->color & 0xFF);
-    pthread_mutex_unlock(&g_lock);
+    int brightness = rgb_to_brightness(state);
+
+    pthread_mutex_lock(&bt_g_lock);
+
+    err = write_int(BUTTONS_FILE, brightness);
+
+    pthread_mutex_unlock(&bt_g_lock);
+
     return err;
 }
 
@@ -128,7 +134,6 @@ close_lights(struct light_device_t *dev)
     return 0;
 }
 
-
 /******************************************************************************/
 
 /**
@@ -136,11 +141,11 @@ close_lights(struct light_device_t *dev)
  */
 
 /** Open a new instance of a lights device using name */
-static int open_lights(const struct hw_module_t* module, char const* name,
-        struct hw_device_t** device)
+static int open_lights(const struct hw_module_t *module, const char *name,
+        struct hw_device_t **device)
 {
-    int (*set_light)(struct light_device_t* dev,
-            struct light_state_t const* state);
+    int (*set_light)(struct light_device_t *dev,
+            const struct light_state_t *state);
 
     if (0 == strcmp(LIGHT_ID_BACKLIGHT, name))
         set_light = set_light_backlight;
@@ -152,10 +157,6 @@ static int open_lights(const struct hw_module_t* module, char const* name,
     pthread_once(&g_init, init_globals);
 
     struct light_device_t *dev = malloc(sizeof(struct light_device_t));
-
-    if(!dev)
-        return -ENOMEM;
-
     memset(dev, 0, sizeof(*dev));
 
     dev->common.tag = HARDWARE_DEVICE_TAG;
@@ -180,7 +181,7 @@ struct hw_module_t HAL_MODULE_INFO_SYM = {
     .version_major = 1,
     .version_minor = 0,
     .id = LIGHTS_HARDWARE_MODULE_ID,
-    .name = "lights Module",
-    .author = "Google, Inc.",
+    .name = "Rendang Lights Module",
+    .author = "The CyanogenMod Project",
     .methods = &lights_module_methods,
 };
