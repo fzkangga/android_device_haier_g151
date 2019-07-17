@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-DEVICE_PATH := device/smartfren/g151
+DEVICE_PATH := device/haier/g151
 
 # Architecture
 TARGET_BOARD_SUFFIX := _32
