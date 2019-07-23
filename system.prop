@@ -1,0 +1,39 @@
+# Audio
+av.offload.enable=true
+
+# dex2oat
+dalvik.vm.dex2oat-filter=interpret-only
+dalvik.vm.image-dex2oat-filter=speed
+
+# Display
+debug.sf.gpu_comp_tiling=1
+
+# GPS
+persist.gps.qc_nlp_in_use=0
+ro.gps.agps_provider=1
+ro.qc.sdk.izat.premium.enabled=0
+ro.qc.sdk.izat.service_mask=0x0
+
+# Media
+mm.enable.smoothstreaming=true
+mm.disable.sec_smoothstreaming=true
+
+# NITZ
+persist.rild.nitz_plmn=
+persist.rild.nitz_long_ons_0=
+persist.rild.nitz_long_ons_1=
+persist.rild.nitz_long_ons_2=
+persist.rild.nitz_long_ons_3=
+persist.rild.nitz_short_ons_0=
+persist.rild.nitz_short_ons_1=
+persist.rild.nitz_short_ons_2=
+persist.rild.nitz_short_ons_3=
+
+# Radio
+rild.libargs=-d /dev/smd0
+
+# Time
+persist.timed.enable=true
+
+# Google assistant
+ro.opa.eligible_device=true
