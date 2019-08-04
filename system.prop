@@ -32,6 +32,15 @@ persist.rild.nitz_short_ons_3=
 # Radio
 rild.libargs=-d /dev/smd0
 
+# Hardware Info
+ro.device.chipset=Qualcomm MSM8909 Snapdragon 210
+ro.device.cpu=Quad-core 1.1 GHz Cortex-A7
+ro.device.gpu=Adreno 304
+ro.device.rear_cam=5 MP
+ro.device.front_cam=5 MP
+ro.device.screen_res=480x854
+ro.product.device=g151
+
 # Time
 persist.timed.enable=true
 
