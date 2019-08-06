@@ -5,8 +5,8 @@ PRODUCT_PACKAGES += \
     libshim_camera \
     Snap
 
-# Build libstlport for vendor blobs
 PRODUCT_PACKAGES += \
+    libboringssl-compat \
     libstlport
 
 # Permissions
@@ -17,6 +17,4 @@ PRODUCT_COPY_FILES += \
 # Properties
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.camera.cpp.duplication=false \
-    persist.camera.hal.debug.mask=0 \
-    media.stagefright.legacyencoder=true \
-    media.stagefright.less-secure=true
+    persist.camera.hal.debug.mask=0
