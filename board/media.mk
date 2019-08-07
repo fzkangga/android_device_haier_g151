@@ -1,0 +1,2 @@
+# Graphics
+TARGET_USE_COMPAT_GRALLOC_ALIGN := true
