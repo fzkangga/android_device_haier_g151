@@ -19,8 +19,6 @@ $(call inherit-product, vendor/haier/g151/g151-vendor.mk)
 # Overlay
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 
-$(call inherit-product, frameworks/native/build/phone-hdpi-512-dalvik-heap.mk)
-
 # Include package config fragments
 include $(LOCAL_PATH)/product/*.mk
 
