@@ -1,109 +1,42 @@
-
-# ART
-dalvik.vm.dex2oat-swap=false
-
-# Audio
-audio.dolby.ds2.enabled=true
-audio.offload.buffer.size.kb=64
-audio.offload.gapless.enabled=true
-audio.offload.min.duration.secs=30
-audio.offload.video=true
-persist.audio.fluence.speaker=true
+# Audio Properties
+ro.qc.sdk.audio.fluencetype=none
 persist.audio.fluence.voicecall=true
 persist.audio.fluence.voicerec=false
-rec.playback.conc.disabled=true
-ro.qc.sdk.audio.fluencetype=none
-ro.qc.sdk.audio.ssr=false
-sys.audio.init=false
-tunnel.audio.encode=false
-use.voice.path.for.pcm.voip=false
-voice.playback.conc.disabled=true
-voice.record.conc.disabled=true
-voice.voip.conc.disabled=true
+persist.audio.fluence.speaker=true
 
-# Battery
-ro.cutoff_voltage_mv=3200
+# Screen density
+ro.sf.lcd_density=240
 
-# Camera
-persist.camera.longshot.stages=1
-media.stagefright.legacyencoder=true
-media.stagefright.less-secure=true
+# Dalvik
+dalvik.vm.heapstartsize=8m
+dalvik.vm.heapgrowthlimit=96m
+dalvik.vm.heapsize=256m
+dalvik.vm.heaptargetutilization=0.75
+dalvik.vm.heapminfree=512k
+dalvik.vm.heapmaxfree=8m
 
-# Display
-debug.composition.type=dyn
-debug.egl.hw=1
-debug.hwc.dynThreshold=2.5
-debug.mdpcomp.logs=0
-debug.sf.hw=1
-debug.sf.hwc.canUseABC=0
-debug.sf.swaprect=0
-dev.pm.dyn_samplingrate=1
-persist.hwc.enable_vds=1
-ro.opengles.version=196608
-sys.hwc.gpu_perf_mode=1
+# Factory Reset Protection
+ro.frp.pst=/dev/block/bootdevice/by-name/config
 
-# DRM
-drm.service.enabled=true
+# use 3 threads max for dex2oat
+ro.sys.fw.dex2oat_thread_count=3
 
-# GPS
-ro.gps.agps_provider=1
+# Camera Properties
+persist.camera.cpp.duplication=false
+persist.camera.hal.debug.mask=0
 
-# Media
-media.aac_51_output_enabled=true
-media.stagefright.enable-player=true
-media.stagefright.enable-http=true
-media.stagefright.enable-aac=true
-media.stagefright.enable-qcp=true
-media.stagefright.enable-fma2dp=true
-media.stagefright.enable-scan=true
-mmp.enable.3g2=true
-persist.mm.sta.enable=1
+# IMS
+persist.radio.jbims=1
+persist.radio.ROTATION_ENABLE=1
+persist.radio.VT_ENABLE=1
+persist.radio.VT_HYBRID_ENABLE=1
+persist.radio.VT_USE_MDM_TIME=0
 
-# Memory
-ro.config.max_starting_bg=8
-ro.sys.fw.bservice_enable=true
-ro.sys.fw.bservice_limit=5
-ro.sys.fw.bservice_age=5000
-ro.sys.fw.empty_app_percent=50
-ro.sys.fw.trim_empty_percent=100
-ro.sys.fw.trim_cache_percent=100
-ro.sys.fw.trim_enable_memory=1073741824
-ro.sys.fw.use_trim_settings=true
-
-# Perf
-ro.core_ctl_min_cpu=2
-ro.core_ctl_max_cpu=4
-ro.vendor.extension_library=libqti-perfd-client.so
-
-# Qualcomm
-persist.tuning.qdcm=1
-ro.qcom.screencolor=1
-ro.qualcomm.cabl=0
-
-# Scheduler
-sys.io.scheduler=bfq
-
-# Telephony
-rild.libargs=-d /dev/smd0
-persist.rild.nitz_plmn=
-persist.rild.nitz_long_ons_0=
-persist.rild.nitz_long_ons_1=
-persist.rild.nitz_long_ons_2=
-persist.rild.nitz_long_ons_3=
-persist.rild.nitz_short_ons_0=
-persist.rild.nitz_short_ons_1=
-persist.rild.nitz_short_ons_2=
-persist.rild.nitz_short_ons_3=
-DEVICE_PROVISIONED=1
-telephony.lteOnCdmaDevice=1
-
-# Time services
-persist.timed.enable=true
-
-# Hardware Info
-ro.device.chipset=Qualcomm MSM8909 Snapdragon 210
-ro.device.cpu=Quad-core 1.1 GHz Cortex-A7
-ro.device.gpu=Adreno 304
-ro.device.rear_cam=5 MP
-ro.device.front_cam=5 MP
-ro.device.screen_res=480x854
+# Radio Properties
+persist.radio.multisim.config=dsds
+persist.radio.custom_ecc=1
+persist.radio.ecc_hard_1=112,911,110,122,119,120,000,118
+persist.radio.ecc_hard_count=1
+rild.libpath=/system/vendor/lib/libril-qc-qmi-1.so
+ril.subscription.types=RUIM
+ro.telephony.default_network=9,1
