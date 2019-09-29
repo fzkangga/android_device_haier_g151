@@ -25,6 +25,13 @@ ro.frp.pst=/dev/block/bootdevice/by-name/config
 # persist.camera.cpp.duplication=false
 # persist.camera.hal.debug.mask=0
 
+# IMS
+persist.radio.jbims=1
+persist.radio.ROTATION_ENABLE=1
+persist.radio.VT_ENABLE=1
+persist.radio.VT_HYBRID_ENABLE=1
+persist.radio.VT_USE_MDM_TIME=0
+
 # Radio Properties
 persist.radio.multisim.config=dsds
 persist.radio.custom_ecc=1
