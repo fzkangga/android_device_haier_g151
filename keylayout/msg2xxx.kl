@@ -12,13 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-LOCAL_PATH := $(call my-dir)
-
-ifeq ($(TARGET_DEVICE), g151)
-
-include $(call all-makefiles-under,$(LOCAL_PATH))
-
-include $(CLEAR_VARS)
-
-endif
+key 139   APP_SWITCH   VIRTUAL
+key 172   HOME         VIRTUAL
+key 158   BACK         VIRTUAL

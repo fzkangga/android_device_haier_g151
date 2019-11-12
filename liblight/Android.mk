@@ -1,5 +1,4 @@
 # Copyright (C) 2015 The CyanogenMod Project
-# Copyright (C) 2017 The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,20 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$(call inherit-product, device/haier/g151/full_g151.mk)
+LOCAL_PATH:= $(call my-dir)
+# HAL module implemenation stored in
+# hw/<COPYPIX_HARDWARE_MODULE_ID>.<ro.board.platform>.so
+include $(CLEAR_VARS)
 
-# Inherit some common LineageOS stuff.
-$(call inherit-product, vendor/lineage/config/common_full_phone.mk)
+LOCAL_SRC_FILES := lights.c
+LOCAL_MODULE_RELATIVE_PATH    := hw
+LOCAL_SHARED_LIBRARIES := liblog libcutils
 
-# Must define platform variant before including any common things
-TARGET_BOARD_PLATFORM_VARIANT := msm8909
+LOCAL_MODULE := lights.$(TARGET_BOARD_PLATFORM)
+LOCAL_MODULE_TAGS := optional
+LOCAL_VENDOR_MODULE := true
 
-PRODUCT_NAME := lineage_g151
-BOARD_VENDOR := haier
-PRODUCT_DEVICE := g151
-
-PRODUCT_GMS_CLIENTID_BASE := android-haier
-
-TARGET_VENDOR_PRODUCT_NAME := A16C3H
-TARGET_VENDOR_DEVICE_NAME := A16C3H
-PRODUCT_BUILD_PROP_OVERRIDES += TARGET_DEVICE=A16C3H PRODUCT_NAME=A16C3H
+include $(BUILD_SHARED_LIBRARY)
