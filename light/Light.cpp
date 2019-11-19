@@ -47,10 +47,6 @@ Light::Light(std::pair<std::ofstream, uint32_t>&& lcd_backlight, std::ofstream&&
     mLights.emplace(std::make_pair(Type::BACKLIGHT, backlightFn));
     mLights.emplace(std::make_pair(Type::BUTTONS, buttonsFn));
 
-    for (int i = 0; i < MAX_COLOR; i++) {
-        rgb2lab(colors[i].r, colors[i].g, colors[i].b,
-                &colors[i]._L, &colors[i]._a, &colors[i]._b);
-    }
 }
 
 // Methods from ::android::hardware::light::V2_0::ILight follow.
