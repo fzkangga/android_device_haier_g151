@@ -59,9 +59,6 @@ BOARD_KERNEL_CMDLINE += phy-msm-usb.floated_charger_enable=1
 # Power
 TARGET_HAS_NO_POWER_STATS := true
 
-# Lights
-TARGET_PROVIDES_LIBLIGHT := true
-
 # Properties
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
@@ -72,6 +69,9 @@ BOARD_NO_SECURE_DISCARD := true
 # Shims
 TARGET_LD_SHIM_LIBS += \
     /system/vendor/lib/libmmcamera2_imglib_modules.so|libshim_camera.so
+
+# SELinux
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
 
 # inherit from the proprietary version
 include vendor/haier/g151/BoardConfigVendor.mk
