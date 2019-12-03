@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The LineageOS Project
+ * Copyright 2017 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,64 +16,35 @@
 
 #define LOG_TAG "android.hardware.light@2.0-service.g151"
 
-#include <android-base/logging.h>
 #include <hidl/HidlTransportSupport.h>
-#include <utils/Errors.h>
 
 #include "Light.h"
 
-// libhwbinder:
 using android::hardware::configureRpcThreadpool;
 using android::hardware::joinRpcThreadpool;
 
-// Generated HIDL files
 using android::hardware::light::V2_0::ILight;
 using android::hardware::light::V2_0::implementation::Light;
 
-const static std::string kLcdBacklightPath = "/sys/class/leds/lcd-backlight/brightness";
-const static std::string kLcdMaxBacklightPath = "/sys/class/leds/lcd-backlight/max_brightness";
-const static std::string kButtonBacklightPath = "/sys/class/leds/button-backlight/brightness";
+using android::OK;
+using android::sp;
+using android::status_t;
 
 int main() {
-    uint32_t lcdMaxBrightness = 255;
-
-    std::ofstream lcdBacklight(kLcdBacklightPath);
-    if (!lcdBacklight) {
-        LOG(ERROR) << "Failed to open " << kLcdBacklightPath << ", error=" << errno
-                   << " (" << strerror(errno) << ")";
-        return -errno;
-    }
-
-    std::ifstream lcdMaxBacklight(kLcdMaxBacklightPath);
-    if (!lcdMaxBacklight) {
-        LOG(ERROR) << "Failed to open " << kLcdMaxBacklightPath << ", error=" << errno
-                   << " (" << strerror(errno) << ")";
-        return -errno;
-    } else {
-        lcdMaxBacklight >> lcdMaxBrightness;
-    }
-
-    std::ofstream buttonBacklight(kButtonBacklightPath);
-    if (!buttonBacklight) {
-        LOG(WARNING) << "Failed to open " << kButtonBacklightPath << ", error=" << errno
-                     << " (" << strerror(errno) << ")";
-    }
-
-    android::sp<ILight> service = new Light(
-            {std::move(lcdBacklight), lcdMaxBrightness}, std::move(buttonBacklight));
+    android::sp<ILight> service = new Light();
 
     configureRpcThreadpool(1, true);
 
-    android::status_t status = service->registerAsService();
-
-    if (status != android::OK) {
-        LOG(ERROR) << "Cannot register Light HAL service";
+    status_t status = service->registerAsService();
+    if (status != OK) {
+        ALOGE("Cannot register Light HAL service.");
         return 1;
     }
 
-    LOG(INFO) << "Light HAL Ready.";
+    ALOGI("Light HAL service ready.");
+
     joinRpcThreadpool();
-    // Under normal cases, execution will not reach this line.
-    LOG(ERROR) << "Light HAL failed to join thread pool.";
+
+    ALOGI("Light HAL service failed to join thread pool.");
     return 1;
 }

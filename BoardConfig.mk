@@ -59,9 +59,6 @@ TARGET_KERNEL_SOURCE := kernel/lineage/msm8916
 TARGET_KERNEL_CONFIG := lineageos_g151_defconfig
 BOARD_KERNEL_CMDLINE += phy-msm-usb.floated_charger_enable=1
 
-# Power
-TARGET_HAS_NO_POWER_STATS := true
-
 # Properties
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
