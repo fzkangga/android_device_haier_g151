@@ -43,7 +43,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/mixer_paths_msm8909_pm8916.xml:system/vendor/etc/mixer_paths_msm8909_pm8916.xml \
     $(LOCAL_PATH)/audio/mixer_paths_skua.xml:system/vendor/etc/mixer_paths_skua.xml \
     $(LOCAL_PATH)/audio/mixer_paths_skuc.xml:system/vendor/etc/mixer_paths_skuc.xml \
-    $(LOCAL_PATH)/audio/mixer_paths_msm8909_x20_g151_pm8916.xml:system/vendor/etc/mixer_paths_msm8909_x20_g151_pm8916.xml
+    $(LOCAL_PATH)/audio/mixer_paths_msm8909_x20_g151_pm8916.xml:system/vendor/etc/mixer_paths_msm8909_x20_g151_pm8916.xml \
     $(LOCAL_PATH)/audio/mixer_paths_skue.xml:system/vendor/etc/mixer_paths_skue.xml
 
 # Boot animation
