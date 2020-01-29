@@ -18,7 +18,7 @@ LOCAL_SHARED_LIBRARIES:= \
     libskia \
     libstagefright \
     libstagefright_foundation \
-    liblog 
+    liblog \
 
 ifneq ($(call is-platform-sdk-version-at-least,18),true)
 
@@ -44,9 +44,12 @@ LOCAL_C_INCLUDES += \
     frameworks/av/include/media/stagefright \
     frameworks/native/include/media/openmax \
 
+LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+
 LOCAL_MODULE:= camera_test
 LOCAL_32_BIT_ONLY := true
 LOCAL_MODULE_TAGS:= tests
+LOCAL_VENDOR_MODULE := true
 
 LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 LOCAL_CFLAGS += -O0

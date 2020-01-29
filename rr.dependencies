@@ -2,15 +2,15 @@
 
   {
     "remote": "github",
-    "repository": "karthikkm007/android_kernel_wingtech_msm8916",
-    "target_path": "kernel/wingtech/msm8916",
-    "branch": "oreo-mr1"
+    "repository": "fzkangga/android_kernel_lineage_msm8916",
+    "target_path": "kernel/linegae/msm8916",
+    "branch": "lineage-15.1"
   },
 
   {
     "remote": "github",
-    "repository": "karthikkm007/vendor_wingtech_wt88047",
-    "target_path": "vendor/wingtech",
+    "repository": "fzkangga/proprietary_vendor_haier",
+    "target_path": "vendor/haier",
     "branch": "oreo-mr1"
   }
 

@@ -15,9 +15,9 @@
 
 LOCAL_PATH := $(call my-dir)
 
-ifeq ($(TARGET_DEVICE), wt88047)
+ifeq ($(TARGET_DEVICE), g151)
 
-ifneq ($(filter msm8916,$(TARGET_BOARD_PLATFORM_VARIANT)),)
+ifneq ($(filter msm8909,$(TARGET_BOARD_PLATFORM_VARIANT)),)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
 

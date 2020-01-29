@@ -35,7 +35,7 @@ class GyroSensor : public SensorBase {
 	sensors_event_t mPendingEvent;
 	sensor_t mSensor;
 	bool mHasPendingEvent;
-	bool mIsFirstTimestamp;
+	bool gyro_hw_type;
 	int64_t mEnabledTime;
 
 	int setInitialState();
