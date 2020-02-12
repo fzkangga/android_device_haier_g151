@@ -40,10 +40,6 @@ LOCAL_CFLAGS += -DUSE_MEDIA_EXTENSIONS
 #LOCAL_CFLAGS += -DUSE_VENDOR_CAMERA_EXT
 #endif
 
-ifeq ($(TARGET_USES_AOSP),true)
-LOCAL_CFLAGS += -DVANILLA_HAL
-endif
-
 ifneq ($(call is-platform-sdk-version-at-least,18),true)
 LOCAL_CFLAGS += -DUSE_JB_MR1
 endif
@@ -93,6 +89,4 @@ LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 
-ifeq ($(TARGET_USES_AOSP),false)
 include $(LOCAL_PATH)/test/Android.mk
-endif
