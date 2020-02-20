@@ -14,4 +14,4 @@
 # # limitations under the License.
 #
 PRODUCT_MAKEFILES := \
-	$(LOCAL_DIR)/rr_wt88047.mk
+	$(LOCAL_DIR)/rr_g151.mk

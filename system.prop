@@ -26,13 +26,13 @@ ro.bluetooth.sap=true
 ro.qualcomm.bt.hci_transport=smd
 
 # Display
-debug.composition.type=c2d
+debug.composition.type=dyn
 debug.mdpcomp.idletime=600
 persist.hwc.mdpcomp.enable=true
 persist.hwc.ptor.enable=true
 debug.enable.sglscale=1
 ro.opengles.version=196608
-ro.sf.lcd_density=280
+ro.sf.lcd_density=240
 debug.hwui.use_buffer_age=false
 
 # DRM
@@ -108,8 +108,6 @@ sys.use_fifo_ui=1
 # Camera
 persist.camera.cpp.duplication=false
 persist.camera.hal.debug.mask=0
-ro.camera.sensors=ov8865_q8v18a,ov2680_skuhf,ov2680_5987fhq
-vidc.enc.narrow.searchrange=1
 mm.enable.smoothstreaming=true
 mmp.enable.3g2=true
 media.stagefright.less-secure=true
@@ -121,9 +119,6 @@ media.stagefright.legacyencoder=true
 # System prop to allocate Reprocess buffer as "1"
 # during Longshot usecase
 persist.camera.longshot.stages=1
-
-# Sensors
-ro.fusion.magfield.max=250
 
 # Vendor security patch level
 ro.lineage.build.vendor_security_patch=2017-01-01

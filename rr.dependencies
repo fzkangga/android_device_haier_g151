@@ -1,20 +1,14 @@
 [
   {
-    "remote": "github",
-    "repository": "dev-harsh1998/GCC_BUILDS",
-    "target_path": "prebuilts/gcc/linux-x86/arm/arm-eabi-7.3",
-    "branch": "master"
+    "remote":  "github",
+    "repository":  "fzkangga/android_kernel_lineage_msm8916",
+    "target_path":  "kernel/linegae/msm8916",
+    "branch":  "lineage-16.0""
   },
   {
     "remote":  "github",
-    "repository":  "karthikkm007/kernel_wingtech_msm8916",
-    "target_path":  "kernel/wingtech/msm8916",
-    "branch":  "oreo-mr2"
-  },
-  {
-    "remote":  "github",
-    "repository":  "karthikkm007/vendor_wingtech_wt88047",
-    "target_path":  "vendor/wingtech",
-    "branch":  "pie-r1"
+    "repository":  "fzkangga/proprietary_vendor_haier",
+    "target_path":  "vendor/haier",
+    "branch":  "pie-ims"
   }
 ]

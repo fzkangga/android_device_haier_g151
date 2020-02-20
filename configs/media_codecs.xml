@@ -81,7 +81,7 @@ Only the three quirks included above are recognized at this point:
 -->
 
 <!--
-  Decoder capabilities for 8916
+  Decoder capabilities for 8909
    ________________________________________________________________________
   | Codec    | W       H       fps     Mbps    MB/s    | Encode Secure-dec |
   |__________|_________________________________________|___________________|
@@ -97,7 +97,7 @@ Only the three quirks included above are recognized at this point:
 -->
 
 <!--
-  Encoder capabilities for 8916
+  Encoder capabilities for 8909
    ____________________________________________________
   | Codec    | W       H       fps     Mbps    MB/s    |
   |__________|_________________________________________|

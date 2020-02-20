@@ -10,4 +10,7 @@
 /vendor/bin/init\.qcom\.mem\.sh                                    u:object_r:qti_init_shell_exec:s0
 
 # HALs
-/vendor/bin/hw/android\.hardware\.usb@1\.0-service\.cyanogen_8916       u:object_r:hal_usb_default_exec:s0
+/vendor/bin/hw/android\.hardware\.usb@1\.0-service\.cyanogen_8909       u:object_r:hal_usb_default_exec:s0
+
+# Light HAL
+/(vendor|system/vendor)/bin/hw/android\.hardware\.light@2\.0-service\.g151 u:object_r:hal_light_default_exec:s0

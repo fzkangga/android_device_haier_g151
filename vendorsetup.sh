@@ -1,2 +1,2 @@
-add_lunch_combo rr_wt88047-userdebug
-add_lunch_combo rr_wt88047-eng
+add_lunch_combo rr_g151-userdebug
+add_lunch_combo rr_g151-eng
