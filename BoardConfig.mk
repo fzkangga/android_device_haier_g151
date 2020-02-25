@@ -48,11 +48,10 @@ TARGET_NO_BOOTLOADER := true
 # Camera
 TARGET_USE_VENDOR_CAMERA_EXT := true
 USE_DEVICE_SPECIFIC_CAMERA := true
-TARGET_NEEDS_LEGACY_CAMERA_HAL1_DYN_NATIVE_HANDLE := true
-TARGET_DESTROYED_MUTEX_USAGE_WHITELIST := system/vendor/bin/mm-qcamera-daemon
 TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
-    /system/bin/mediaserver=22 \
-    /system/vendor/bin/mm-qcamera-daemon=22
+	/system/bin/mediaserver=22 \
+	/system/bin/cameraserver=22 \
+	/system/vendor/bin/mm-qcamera-daemon=22
 
 # Crypto
 TARGET_HW_DISK_ENCRYPTION := true
