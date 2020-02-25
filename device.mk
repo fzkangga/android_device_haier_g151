@@ -275,33 +275,11 @@ PRODUCT_PACKAGES += \
     sensors.msm8909 \
     sensors.g151
 
-# IMS
-PRODUCT_PACKAGES += \
-    ims-common
-
 # Telephony
 PRODUCT_PACKAGES += \
     telephony-ext
 
 PRODUCT_BOOT_JARS += \
     telephony-ext
-
-# IMS ( Vendor )
-PRODUCT_PACKAGES += \
-    ims \
-    shutdownlistener \
-    TimeService \
-    qcrilmsgtunnel \
-    uceShimService \
-    embms \
-    QtiTelephonyService \
-    android.hardware.radio.config@1.0 \
-    android.hardware.radio.deprecated@1.0 \
-    libandroid_net \
-    libqdMetaData.system \
-    libreference-ril \
-    libril \
-    librilutils \
-    vendor.qti.hardware.camera.device@1.0
 
 include device/haier/g151/default-prop.mk

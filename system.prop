@@ -57,7 +57,7 @@ persist.radio.multisim.config=dsds
 persist.radio.custom_ecc=1
 persist.radio.ecc_hard_1=112,911,110,122,119,120,000,118
 persist.radio.ecc_hard_count=1
-rild.libpath=/vendor/lib/libril-qc-qmi-1.so
+rild.libpath=/system/vendor/lib/libril-qc-qmi-1.so
 ril.subscription.types=RUIM
 
 # IMS
@@ -107,6 +107,11 @@ sys.use_fifo_ui=1
 # Camera
 persist.camera.cpp.duplication=false
 persist.camera.hal.debug.mask=0
+
+# System property for Camera
+# System prop to allocate Reprocess buffer as "1"
+# during Longshot usecase
+persist.camera.longshot.stages=1
 
 # Vendor security patch level
 ro.lineage.build.vendor_security_patch=2017-01-01
