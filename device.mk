@@ -258,7 +258,6 @@ PRODUCT_PACKAGES += \
     camera.device@3.2-impl \
     camera.msm8909 \
     libmm-qcamera \
-    FootejCamera \
     Snap
 
 # GPS
