@@ -210,6 +210,11 @@
         <item>"/system/framework/boot-core-libart.vdex"</item>
     </string-array>
 
+    <!-- When true, the tethering upstream network follows the current default
+         Internet network (except when the current default network is mobile,
+         in which case a DUN network will be used if required). -->
+    <bool translatable="false" name="config_tether_upstream_automatic">true</bool>
+
     <!-- This string array should be overridden by the device to present a list of network
          attributes.  This is used by the connectivity manager to decide which networks can coexist
          based on the hardware -->
@@ -313,8 +318,8 @@
          If no value is found for the rat-name in use, the system default will be applied.
     -->
     <string-array name="config_mobile_tcp_buffers">
-        <item>lte:lte:2097152,4194304,8388608,262144,524288,1048576</item>
-        <item>lte_ca:4096,6291456,12582912,4096,1048576,2097152</item>
+        <item>lte:2097152,4194304,8388608,262144,524288,1048576</item>
+        <item>lte_ca:2097152,4194304,8388608,262144,524288,1048576</item>
         <item>umts:4094,87380,110208,4096,16384,110208</item>
         <item>hspa:4094,87380,1220608,4096,16384,1220608</item>
         <item>hsupa:4094,87380,1220608,4096,16384,1220608</item>
@@ -439,12 +444,6 @@
         <item>LPPE_CP_TECHNOLOGY=0</item>
         <item>LPPE_UP_TECHNOLOGY=0</item>
     </string-array>
-
-    <!-- ImsService package name to bind to by default, if config_dynamic_bind_ims is true -->
-    <string name="config_ims_package">org.codeaurora.ims</string>
-
-    <!-- Flag specifying whether or not IMS will use the ImsResolver dynamically -->
-    <bool name="config_dynamic_bind_ims">true</bool>
 
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">true</bool>
