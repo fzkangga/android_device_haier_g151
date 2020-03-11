@@ -1,21 +1,20 @@
 # Media
 media.aac_51_output_enabled=true
-ro.config.max_starting_bg=8
 
 # Audio
 af.fast_track_multiplier=1
 audio.deep_buffer.media=true
 audio.offload.min.duration.secs=30
 audio.offload.video=true
+vendor.audio.av.streaming.offload.enable=true
+vendor.audio.offload.buffer.size.kb=64
+vendor.audio.offload.gapless.enabled=true
+vendor.audio_hal.period_size=192
+vendor.voice.path.for.pcm.voip=true
 ro.vendor.audio.sdk.fluencetype=fluence
 persist.vendor.audio.fluence.voicecall=true
 persist.vendor.audio.fluence.voicerec=false
 persist.vendor.audio.fluence.speaker=false
-vendor.audio_hal.period_size=192
-vendor.audio.av.streaming.offload.enable=true
-vendor.audio.offload.buffer.size.kb=64
-vendor.audio.offload.gapless.enabled=true
-vendor.voice.path.for.pcm.voip=true
 
 # Bluetooth
 vendor.qcom.bluetooth.soc=smd
@@ -24,7 +23,13 @@ ro.bluetooth.hfp.ver=1.7
 ro.bluetooth.sap=true
 ro.qualcomm.bt.hci_transport=smd
 
+# Camera
+persist.camera.cpp.duplication=false
+persist.camera.hal.debug.mask=0
+persist.camera.longshot.stages=1
+
 # Display
+debug.hwui.use_buffer_age=false
 debug.composition.type=dyn
 debug.mdpcomp.idletime=600
 persist.hwc.mdpcomp.enable=true
@@ -32,23 +37,27 @@ persist.hwc.ptor.enable=true
 debug.enable.sglscale=1
 ro.opengles.version=196608
 ro.sf.lcd_density=240
-debug.hwui.use_buffer_age=false
 
-# DRM
+# FRP
+ro.frp.pst=/dev/block/platform/soc.0/7824900.sdhci/by-name/config
+
+#HWUI properties
+ro.hwui.text_large_cache_height=2048
+
+# Media
 drm.service.enabled=1
 vidc.enc.narrow.searchrange=1
 
-# Storage
-ro.sys.sdcardfs=true
-
-# Power
+# Perf
+ro.config.max_starting_bg=8
 ro.vendor.extension_library=libqti-perfd-client.so
 ro.core_ctl_min_cpu=0
 ro.core_ctl_max_cpu=4
 ro.min_freq_0=800000
 
-# RIL
+# Radio
 persist.data.qmi.adb_logmask=0
+persist.radio.add_power_save=1
 persist.radio.apm_sim_not_pwdn=1
 persist.vendor.radio.apm_sim_not_pwdn=1
 ro.telephony.call_ring.multiple=false
@@ -59,33 +68,8 @@ persist.radio.ecc_hard_count=1
 rild.libpath=/system/vendor/lib/libril-qc-qmi-1.so
 ril.subscription.types=RUIM
 
-# IMS
-persist.vendor.lte.pco_supported=true
-telephony.lteOnCdmaDevice=1
-persist.vendor.radio.snapshot_timer=22
-persist.vendor.radio.snapshot_enabled=1
-persist.vendor.radio.jbims=1
-persist.vendor.vt.supported=1
-persist.vendor.sys.cnd.iwlan=1
-persist.vendor.cne.logging.qxdm=3974
-persist.vendor.ims.disableIMSLogs=0
-persist.vendor.ims.disableDebugDataPathLogs=0
-persist.vendor.ims.disableADBLogs=0
-persist.vendor.ims.vt.enableadb=1
-persist.radio.voice_on_lte=1
-persist.vendor.radio.lte_vrte_ltd=1
-persist.radio.lte_vrte_ltd=1
-persist.vendor.radio.voice_on_lte=1
-persist.radio.voice_on_lte=1
-persist.dbg.volte_avail_ovr=1
-persist.dbg.vt_avail_ovr=1
-persist.vendor.ims.dropset_feature=0
-
-# WIFI
-wifi.interface=wlan0
-
-# FRP
-ro.frp.pst=/dev/block/platform/soc.0/7824900.sdhci/by-name/config
+# Storage
+ro.sys.sdcardfs=true
 
 # SYS
 ro.sys.fw.use_trim_settings=true
@@ -103,17 +87,8 @@ dalvik.vm.dex2oat-flags=--no-watch-dog
 dalvik.vm.dex2oat-swap=false
 sys.use_fifo_ui=1
 
-# Camera
-persist.camera.cpp.duplication=false
-persist.camera.hal.debug.mask=0
-
-# System property for Camera
-# System prop to allocate Reprocess buffer as "1"
-# during Longshot usecase
-persist.camera.longshot.stages=1
-
 # Vendor security patch level
 ro.lineage.build.vendor_security_patch=2017-01-01
 
-#HWUI properties
-ro.hwui.text_large_cache_height=2048
+# Wi-Fi
+wifi.interface=wlan0
