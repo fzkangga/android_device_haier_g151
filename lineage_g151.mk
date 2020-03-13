@@ -21,6 +21,10 @@ $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 # Must define platform variant before including any common things
 TARGET_BOARD_PLATFORM_VARIANT := msm8909
 
+# Inherit common Android Go configurations
+$(call inherit-product, build/target/product/go_defaults.mk)
+IS_GO_VERSION := true
+
 PRODUCT_NAME := lineage_g151
 BOARD_VENDOR := haier
 PRODUCT_DEVICE := g151
