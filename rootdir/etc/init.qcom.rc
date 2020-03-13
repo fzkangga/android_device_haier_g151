@@ -26,7 +26,6 @@
 #
 
 import init.qcom.power.rc
-import init.qcom.ssr.rc
 import init.qcom.usb.rc
 import init.target.rc
 
@@ -106,6 +105,14 @@ on post-fs-data
 on early-boot
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
+
+    # Subsystem Restart
+    # Venus
+    write /sys/bus/msm_subsys/devices/subsys0/restart_level "related"
+    # WCNSS
+    write /sys/bus/msm_subsys/devices/subsys1/restart_level "related"
+    # Modem
+    write /sys/bus/msm_subsys/devices/subsys2/restart_level "related"
 
     write /sys/kernel/boot_adsp/boot 1
 
