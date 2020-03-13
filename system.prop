@@ -1,6 +1,3 @@
-# Media
-media.aac_51_output_enabled=true
-
 # Audio
 af.fast_track_multiplier=1
 audio.deep_buffer.media=true
@@ -16,7 +13,11 @@ persist.vendor.audio.fluence.voicecall=true
 persist.vendor.audio.fluence.voicerec=false
 persist.vendor.audio.fluence.speaker=false
 
+ro.config.media_vol_steps=25
+ro.config.vc_call_vol_steps=7
+
 # Bluetooth
+vendor.bluetooth.soc=pronto
 vendor.qcom.bluetooth.soc=pronto
 ro.bluetooth.dun=true
 ro.bluetooth.hfp.ver=1.7
@@ -47,6 +48,9 @@ ro.hwui.text_large_cache_height=2048
 # Media
 drm.service.enabled=1
 vidc.enc.narrow.searchrange=1
+
+# Memory optimizations
+ro.vendor.qti.sys.fw.bservice_enable=true
 
 # Perf
 ro.config.max_starting_bg=8
