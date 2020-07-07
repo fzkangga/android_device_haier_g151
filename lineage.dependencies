@@ -1,10 +1,20 @@
 [
   {
-    "repository": "android_device_cyanogen_msm8916-common",
-    "target_path": "device/cyanogen/msm8916-common"
+    "remote":  "github",
+    "repository":  "fzkangga/android_device_haier_g151_msm8909-common",
+    "target_path":  "device/haier/msm8909-common",
+    "branch":  "lineage-16.0""
   },
   {
-    "repository": "android_kernel_wingtech_msm8916",
-    "target_path": "kernel/wingtech/msm8916"
+    "remote":  "github",
+    "repository":  "fzkangga/android_kernel_lineage_msm8916",
+    "target_path":  "kernel/linegae/msm8916",
+    "branch":  "lineage-16.0""
+  },
+  {
+    "remote":  "github",
+    "repository":  "fzkangga/proprietary_vendor_haier",
+    "target_path":  "vendor/haier",
+    "branch":  "pie-ims"
   }
 ]

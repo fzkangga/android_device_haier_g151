@@ -15,21 +15,17 @@
 # limitations under the License.
 #
 
-FORCE_32_BIT := true
+# Inherit from msm8909-common
+include device/haier/msm8909-common/BoardConfigCommon.mk
 
-# Inherit from msm8916-common
-include device/cyanogen/msm8916-common/BoardConfigCommon.mk
-
-DEVICE_PATH := device/wingtech/wt88047
+DEVICE_PATH := device/haier/g151
 
 # Bluetooth
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(DEVICE_PATH)/bluetooth
 
 # Camera
-BOARD_CAMERA_SENSORS := ov2680_5987fhq ov8865_q8v18a ov2680_skuhf
-BOARD_GLOBAL_CFLAGS += -DCAMERA_VENDOR_L_COMPAT
+TARGET_USE_VENDOR_CAMERA_EXT := true
 USE_DEVICE_SPECIFIC_CAMERA := true
-TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
 TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
     /system/bin/cameraserver=22 \
     /system/bin/mediaserver=22 \
@@ -46,8 +42,8 @@ BOARD_BOOTIMAGE_PARTITION_SIZE := 33554432
 BOARD_CACHEIMAGE_PARTITION_SIZE := 335544320
 BOARD_PERSISTIMAGE_PARTITION_SIZE := 33554432
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 33554432
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1073741824
-BOARD_USERDATAIMAGE_PARTITION_SIZE := 5939100672
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1947480064
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 4930826240
 BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_FS_CONFIG_GEN := $(DEVICE_PATH)/config.fs
 
@@ -55,15 +51,12 @@ TARGET_FS_CONFIG_GEN := $(DEVICE_PATH)/config.fs
 TARGET_NO_RPC := true
 USE_DEVICE_SPECIFIC_GPS := true
 
-# Init
-TARGET_LIBINIT_MSM8916_DEFINES_FILE := $(DEVICE_PATH)/init/init_wt88047.cpp
-
 # Kernel
 BOARD_DTBTOOL_ARGS := -2
-BOARD_KERNEL_IMAGE_NAME := Image
+BOARD_KERNEL_IMAGE_NAME := zImage
 BOARD_KERNEL_SEPARATED_DT := true
-TARGET_KERNEL_SOURCE := kernel/wingtech/msm8916
-TARGET_KERNEL_CONFIG := lineageos_wt88047_defconfig
+TARGET_KERNEL_SOURCE := kernel/lineage/msm8916
+TARGET_KERNEL_CONFIG := lineageos_g151_defconfig
 BOARD_KERNEL_CMDLINE += phy-msm-usb.floated_charger_enable=1
 
 # Power
@@ -79,10 +72,11 @@ BOARD_SEPOLICY_DIRS += \
 
 # Shims
 TARGET_LD_SHIM_LIBS += \
+    /system/vendor/bin/mm-qcamera-daemon|libshim_camera.so \
     /system/vendor/lib/libmmcamera2_imglib_modules.so|libshim_camera.so
 
 # Shipping API level (for CTS backward compatibility)
 PRODUCT_SHIPPING_API_LEVEL := 19
 
 # inherit from the proprietary version
-include vendor/wingtech/wt88047/BoardConfigVendor.mk
+include vendor/haier/g151/BoardConfigVendor.mk

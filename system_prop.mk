@@ -8,24 +8,27 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # Camera
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.camera.cpp.duplication=false \
-    persist.camera.hal.debug.mask=0 \
-    ro.camera.sensors=ov8865_q8v18a,ov2680_skuhf,ov2680_5987fhq
+    persist.camera.hal.debug.mask=0
+
+# Dalvik
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.heapstartsize=8m \
+    dalvik.vm.heapgrowthlimit=96m \
+    dalvik.vm.heapsize=256m \
+    dalvik.vm.heaptargetutilization=0.75 \
+    dalvik.vm.heapminfree=512k \
+    dalvik.vm.heapmaxfree=8m
 
 # Display
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.sf.lcd_density=320
+    ro.sf.lcd_density=240
 
 # Factory Reset Protection
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.frp.pst=/dev/block/platform/soc.0/7824900.sdhci/by-name/config
 
-# Fusion mag field filter
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.fusion.magfield.max=250
-
 # Radio
 PRODUCT_PROPERTY_OVERRIDES += \
-    persist.data.target=dpm1 \
     persist.radio.multisim.config=dsds \
     persist.radio.custom_ecc=1 \
     persist.radio.ecc_hard_1=112,911,110,122,119,120,000,118 \

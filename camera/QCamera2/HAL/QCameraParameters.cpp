@@ -40,14 +40,9 @@
 #include "QCamera2HWI.h"
 #include "QCameraParameters.h"
 
-#define PI 3.14159265
 #define ASPECT_TOLERANCE 0.001
 #define CAMERA_DEFAULT_LONGSHOT_STAGES 4
 #define CAMERA_MIN_LONGSHOT_STAGES 2
-/* Minumum num of buffers needed for Longshot limited mode
-   This is derived for 3FPS of snapshot frame rate, 1.5FPS of burst frame rate and
-   2 buffers for ISP ping-pong*/
-#define MIN_LONGSHOT_LIMITED_BUFFERS 9
 
 namespace qcamera {
 // Parameter keys to communicate between camera application and driver.
@@ -176,7 +171,6 @@ const char QCameraParameters::KEY_QC_MANUAL_WB_VALUE[] = "manual-wb-value";
 const char QCameraParameters::KEY_INTERNAL_PERVIEW_RESTART[] = "internal-restart";
 const char QCameraParameters::KEY_QC_LONG_SHOT[] = "long-shot";
 const char QCameraParameters::KEY_QC_LONGSHOT_SUPPORTED[] = "longshot-supported";
-const char QCameraParameters::KEY_QC_MAX_LONGSHOT_SNAP[] = "max-longshot-snap";
 const char QCameraParameters::KEY_QC_4K2K_LIVESNAP_SUPPORTED[] = "4k2k-video-snapshot-supported";
 const char QCameraParameters::KEY_QC_ZSL_HDR_SUPPORTED[] = "zsl-hdr-supported";
 const char QCameraParameters::KEY_QC_AUTO_HDR_SUPPORTED[] = "auto-hdr-supported";
@@ -616,7 +610,7 @@ const QCameraParameters::QCameraMap<cam_antibanding_mode_type>
 const QCameraParameters::QCameraMap<cam_iso_mode_type>
         QCameraParameters::ISO_MODES_MAP[] = {
     { ISO_AUTO,  CAM_ISO_MODE_AUTO },
-    { ISO_HJR,   CAM_ISO_MODE_DEBLUR },
+    { ISO_HJR,   CAM_ISO_MODE_AUTO }, // ISO DEBLUR is broken in the backend
     { ISO_100,   CAM_ISO_MODE_100 },
     { ISO_200,   CAM_ISO_MODE_200 },
     { ISO_400,   CAM_ISO_MODE_400 },
@@ -798,14 +792,14 @@ QCameraParameters::QCameraParameters()
       m_bTruePortraitOn(false),
       m_bSensorHDREnabled(false),
       m_bIsLowMemoryDevice(false),
-      m_bLowPowerMode(false),
-      m_bIsLongshotLimited(false),
-      m_nMaxLongshotNum(-1)
+      m_bLowPowerMode(false)
 {
     char value[PROPERTY_VALUE_MAX];
+#ifndef DISABLE_DEBUG_LOG
     // TODO: may move to parameter instead of sysprop
     property_get("persist.debug.sf.showfps", value, "0");
     m_bDebugFps = atoi(value) > 0 ? true : false;
+#endif
     m_bReleaseTorchCamera = false;
     m_pTorch = NULL;
 
@@ -895,9 +889,7 @@ QCameraParameters::QCameraParameters(const String8 &params)
     m_bTruePortraitOn(false),
     m_bSensorHDREnabled(false),
     m_bIsLowMemoryDevice(false),
-    m_bLowPowerMode(false),
-    m_bIsLongshotLimited(false),
-    m_nMaxLongshotNum(-1)
+    m_bLowPowerMode(false)
 {
     memset(&m_LiveSnapshotSize, 0, sizeof(m_LiveSnapshotSize));
     m_pTorch = NULL;
@@ -1312,11 +1304,10 @@ int32_t QCameraParameters::setPictureSize(const QCameraParameters& params)
                     (width != old_width || height != old_height)) {
                     m_bNeedRestart = true;
                 }
+
                 // set the new value
                 CDBG_HIGH("%s: Requested picture size %d x %d", __func__, width, height);
                 CameraParameters::setPictureSize(width, height);
-                // Update View angles based on Picture Aspect ratio
-                updateViewAngles();
                 return NO_ERROR;
             }
         }
@@ -1336,71 +1327,11 @@ int32_t QCameraParameters::setPictureSize(const QCameraParameters& params)
             sprintf(val, "%dx%d", width, height);
             CDBG_HIGH("%s: picture size requested %s", __func__, val);
             updateParamEntry(KEY_PICTURE_SIZE, val);
-            // Update View angles based on Picture Aspect ratio
-            updateViewAngles();
             return NO_ERROR;
         }
     }
     ALOGE("Invalid picture size requested: %dx%d", width, height);
     return BAD_VALUE;
-}
-
-/*===========================================================================
- * FUNCTION   : updateViewAngles
- *
- * DESCRIPTION: Update the Horizontal & Vertical based on the Aspect ratio of Preview and
- *                        Picture aspect ratio
- *
- * PARAMETERS : none
- *
- * RETURN     : none
- *==========================================================================*/
-void QCameraParameters::updateViewAngles()
-{
-    double stillAspectRatio, maxPictureAspectRatio;
-    int stillWidth, stillHeight, maxWidth, maxHeight;
-    // The crop factors from the full sensor array to the still picture crop region
-    double horizCropFactor = 1.f,vertCropFactor = 1.f;
-    float horizViewAngle, vertViewAngle, maxHfov, maxVfov;
-
-    // Get current Picture & max Snapshot sizes
-    getPictureSize(&stillWidth, &stillHeight);
-    maxWidth  = m_pCapability->picture_sizes_tbl[0].width;
-    maxHeight = m_pCapability->picture_sizes_tbl[0].height;
-
-    // Get default maximum FOV from corresponding sensor driver
-    maxHfov = m_pCapability->hor_view_angle;
-    maxVfov = m_pCapability->ver_view_angle;
-
-    stillAspectRatio = (double)stillWidth/stillHeight;
-    maxPictureAspectRatio = (double)maxWidth/maxHeight;
-    CDBG("%s: Stillwidth: %d, height: %d", __func__, stillWidth, stillHeight);
-    CDBG("%s: Max width: %d, height: %d", __func__, maxWidth, maxHeight);
-    CDBG("%s: still aspect: %f, Max Pic Aspect: %f", __func__,
-            stillAspectRatio, maxPictureAspectRatio);
-
-    // crop as per the Maximum Snapshot aspect ratio
-    if (stillAspectRatio < maxPictureAspectRatio)
-        horizCropFactor = stillAspectRatio/maxPictureAspectRatio;
-    else
-        vertCropFactor = maxPictureAspectRatio/stillAspectRatio;
-
-    CDBG("%s: horizCropFactor %f, vertCropFactor %f",
-            __func__, horizCropFactor, vertCropFactor);
-
-    // Now derive the final FOV's based on field of view formula is i.e,
-    // angle of view = 2 * arctangent ( d / 2f )
-    // where d is the physical sensor dimension of interest, and f is
-    // the focal length. This only applies to rectilinear sensors, for focusing
-    // at distances >> f, etc.
-    // Here d/2f is nothing but the Maximum Horizontal or Veritical FOV
-    horizViewAngle = (180/PI)*2*atan(horizCropFactor*tan((maxHfov/2)*(PI/180)));
-    vertViewAngle = (180/PI)*2*atan(horizCropFactor*tan((maxVfov/2)*(PI/180)));
-
-    setFloat(QCameraParameters::KEY_HORIZONTAL_VIEW_ANGLE, horizViewAngle);
-    setFloat(QCameraParameters::KEY_VERTICAL_VIEW_ANGLE, vertViewAngle);
-    CDBG_HIGH("%s: Final horizViewAngle %f, vertViewAngle %f",
-           __func__, horizViewAngle, vertViewAngle);
 }
 
 /*===========================================================================
@@ -2968,6 +2899,7 @@ int32_t QCameraParameters::setMCEValue(const QCameraParameters& params)
  *==========================================================================*/
 int32_t QCameraParameters::setDISValue(const QCameraParameters& params)
 {
+/*
     const char *str = params.get(KEY_QC_DIS);
     const char *prev_str = get(KEY_QC_DIS);
     if (str != NULL) {
@@ -2976,6 +2908,7 @@ int32_t QCameraParameters::setDISValue(const QCameraParameters& params)
             return setDISValue(str);
         }
     }
+*/
     return NO_ERROR;
 }
 
@@ -4113,41 +4046,6 @@ int32_t QCameraParameters::setBurstNum(const QCameraParameters& params)
         set(KEY_QC_SNAPSHOT_BURST_NUM, nBurstNum);
     }
     m_nBurstNum = (uint8_t)nBurstNum;
-
-    return NO_ERROR;
-}
-
-/*===========================================================================
- * FUNCTION   : setMaxLongshotNum
- *
- * DESCRIPTION: set max number of snaps on longshot
- *
- * PARAMETERS :
- *   @params  : user setting parameters
- *
- * RETURN     : int32_t type of status
- *              NO_ERROR  -- success
- *              none-zero failure code
- *==========================================================================*/
-int32_t QCameraParameters::setMaxLongshotNum(const QCameraParameters& params)
-{
-    int nMaxLongshotNum;
-    const char* str = params.get(KEY_QC_MAX_LONGSHOT_SNAP);
-    const char* prev_str = get(KEY_QC_MAX_LONGSHOT_SNAP);
-
-    if (str != NULL) {
-        if (prev_str == NULL ||
-            strcmp(str, prev_str) != 0) {
-            nMaxLongshotNum = params.getInt(KEY_QC_MAX_LONGSHOT_SNAP);
-            m_nMaxLongshotNum = nMaxLongshotNum;
-            if (nMaxLongshotNum > 0) {
-                m_bIsLongshotLimited = true;
-            }
-            else {
-                m_bIsLongshotLimited = false;
-            }
-       }
-    }
     return NO_ERROR;
 }
 
@@ -4336,7 +4234,6 @@ int32_t QCameraParameters::updateParameters(QCameraParameters& params,
     if ((rc = setVideoHDR(params)))                     final_rc = rc;
     if ((rc = setVtEnable(params)))                     final_rc = rc;
     if ((rc = setBurstNum(params)))                     final_rc = rc;
-    if ((rc = setMaxLongshotNum(params)))               final_rc = rc;
     if ((rc = setSnapshotFDReq(params)))                final_rc = rc;
     if ((rc = setTintlessValue(params)))                final_rc = rc;
     if ((rc = setCDSMode(params)))                      final_rc = rc;
@@ -4570,7 +4467,7 @@ int32_t QCameraParameters::initDefaultParameters()
     set(KEY_QC_RAW_PICUTRE_SIZE, raw_size_str);
 
     //set default jpeg quality and thumbnail quality
-    set(KEY_JPEG_QUALITY, 85);
+    set(KEY_JPEG_QUALITY, 95);
     set(KEY_JPEG_THUMBNAIL_QUALITY, 85);
 
     // Set FPS ranges
@@ -5009,9 +4906,9 @@ int32_t QCameraParameters::initDefaultParameters()
     set(KEY_QC_SUPPORTED_MEM_COLOR_ENHANCE_MODES, enableDisableValues);
     setMCEValue(VALUE_ENABLE);
 
-    // Set DIS
+    /* Set DIS
     set(KEY_QC_SUPPORTED_DIS_MODES, enableDisableValues);
-    setDISValue(VALUE_DISABLE);
+    setDISValue(VALUE_DISABLE); */
 
     // Set Histogram
     set(KEY_QC_SUPPORTED_HISTOGRAM_MODES,
@@ -5134,6 +5031,8 @@ int32_t QCameraParameters::initDefaultParameters()
     CDBG_HIGH("%s: totalram = %ld, freeram = %ld ", __func__, info.totalram,
         info.freeram);
     if (info.totalram > TOTAL_RAM_SIZE_512MB) {
+        /* Report as unsupported on Rendang. It's buggy and provides almost no
+           benefit. */
         set(KEY_QC_ZSL_HDR_SUPPORTED, VALUE_FALSE);
     } else {
         m_bIsLowMemoryDevice = true;
@@ -5179,6 +5078,9 @@ int32_t QCameraParameters::init(cam_capability_t *capabilities,
                                 QCameraTorchInterface *torch)
 {
     int32_t rc = NO_ERROR;
+
+    // Set default sharpness to 1
+    capabilities->sharpness_ctrl.def_value = 6;
 
     m_pCapability = capabilities;
     m_pCamOpsTbl = mmOps;
@@ -8749,7 +8651,7 @@ uint32_t QCameraParameters::getJpegQuality()
 {
     int quality = getInt(KEY_JPEG_QUALITY);
     if (quality < 0) {
-        quality = 85; // set to default quality value
+        quality = 95; // set to default quality value
     }
     return (uint32_t)quality;
 }
@@ -10045,9 +9947,11 @@ int32_t QCameraParameters::commitParamChanges()
  *
  * RETURN     : none
  *==========================================================================*/
-QCameraReprocScaleParam::QCameraReprocScaleParam(QCameraParameters *parent __unused)
-  : mScaleEnabled(false),
+QCameraReprocScaleParam::QCameraReprocScaleParam(QCameraParameters *parent)
+  : mParent(parent),
+    mScaleEnabled(false),
     mIsUnderScaling(false),
+    mScaleDirection(0),
     mNeedScaleCnt(0),
     mSensorSizeTblCnt(0),
     mSensorSizeTbl(NULL),
@@ -10628,24 +10532,6 @@ uint8_t QCameraParameters::getNumOfExtraBuffersForPreview()
         numOfBufs = 1;
     }
 
-    return numOfBufs;
-}
-
-/*===========================================================================
- * FUNCTION   : getNumOfBuffersForLongshotLimitedMode
- *
- * DESCRIPTION: get number of extra buffers needed for longshot limited mode
- *
- * PARAMETERS : none
- *
- * RETURN     : number of buffers needed for longshot limited mode;
- *==========================================================================*/
-int QCameraParameters::getNumOfBuffersForLongshotLimitedMode()
-{
-    int numOfBufs = getMaxLongshotNum() -1;
-    if (numOfBufs < MIN_LONGSHOT_LIMITED_BUFFERS) {
-        numOfBufs = MIN_LONGSHOT_LIMITED_BUFFERS;
-    }
     return numOfBufs;
 }
 
