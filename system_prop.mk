@@ -27,6 +27,30 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.frp.pst=/dev/block/platform/soc.0/7824900.sdhci/by-name/config
 
+# IMS
+PRODUCT_PROPERTY_OVERRIDES += \
+    net.lte.volte_call_capable=true \
+    persist.data.iwlan.enable=true \
+	persist.dbg.ims_volte_enable=1 \
+	persist.dbg.volte_avail_ovr=1 \
+	persist.dbg.vt_avail_ovr=1 \
+	persist.dbg.wfc_avail_ovr=1 \
+	persist.ims.volte=true \
+	persist.ims.disableADBLogs=1 \
+	persist.ims.disableDebugLogs=1 \
+	persist.ims.disableIMSLogs=1 \
+	persist.ims.disableQXDMLogs=1 \
+	persist.radio.calls.on.ims=true \
+	persist.radio.csvt.enabled=false \
+	persist.radio.jbims=1 \
+	persist.radio.ROTATION_ENABLE=1 \
+	persist.radio.schd.cache=3500 \
+	persist.radio.VT_ENABLE=1 \
+	persist.radio.VT_HYBRID_ENABLE=1 \
+	persist.radio.VT_USE_MDM_TIME=0 \
+	persist.volte_enabled_by_hw=1 \
+	telephony.lteOnCdmaDevice=1
+
 # Radio
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.radio.multisim.config=dsds \

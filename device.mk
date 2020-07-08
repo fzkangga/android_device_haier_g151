@@ -128,6 +128,14 @@ PRODUCT_COPY_FILES += \
 # System Properties
 $(call inherit-product, device/haier/g151/system_prop.mk)
 
+# Telephony packages
+PRODUCT_PACKAGES += \
+    ims-ext-common \
+    telephony-ext
+
+PRODUCT_BOOT_JARS += \
+    telephony-ext
+
 # USB ID
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     ro.usb.vid=201E \
