@@ -135,7 +135,7 @@ $(call inherit-product, device/haier/g151/system_prop.mk)
 # Telephony packages
 PRODUCT_PACKAGES += \
     ims-ext-common \
-    qti-telephony-common
+    telephony-ext
 
 PRODUCT_BOOT_JARS += \
     telephony-ext
