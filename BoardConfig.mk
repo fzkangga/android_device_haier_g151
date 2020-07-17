@@ -26,10 +26,8 @@ DEVICE_PATH := device/wingtech/wt88047
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(DEVICE_PATH)/bluetooth
 
 # Camera
-BOARD_CAMERA_SENSORS := ov2680_5987fhq ov8865_q8v18a ov2680_skuhf
-BOARD_GLOBAL_CFLAGS += -DCAMERA_VENDOR_L_COMPAT
+TARGET_USE_VENDOR_CAMERA_EXT := true
 USE_DEVICE_SPECIFIC_CAMERA := true
-TARGET_NEEDS_PLATFORM_TEXT_RELOCATIONS := true
 TARGET_PROCESS_SDK_VERSION_OVERRIDE := \
     /system/bin/cameraserver=22 \
     /system/bin/mediaserver=22 \
@@ -79,6 +77,7 @@ BOARD_SEPOLICY_DIRS += \
 
 # Shims
 TARGET_LD_SHIM_LIBS += \
+    /system/vendor/bin/mm-qcamera-daemon|libshim_camera.so \
     /system/vendor/lib/libmmcamera2_imglib_modules.so|libshim_camera.so
 
 # Shipping API level (for CTS backward compatibility)
