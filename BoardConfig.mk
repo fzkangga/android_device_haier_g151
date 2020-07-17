@@ -15,12 +15,10 @@
 # limitations under the License.
 #
 
-FORCE_32_BIT := true
+# Inherit from msm8909-common
+include device/haier/msm8909-common/BoardConfigCommon.mk
 
-# Inherit from msm8916-common
-include device/cyanogen/msm8916-common/BoardConfigCommon.mk
-
-DEVICE_PATH := device/wingtech/wt88047
+DEVICE_PATH := device/haier/g151
 
 # Bluetooth
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(DEVICE_PATH)/bluetooth
@@ -84,4 +82,4 @@ TARGET_LD_SHIM_LIBS += \
 PRODUCT_SHIPPING_API_LEVEL := 19
 
 # inherit from the proprietary version
-include vendor/wingtech/wt88047/BoardConfigVendor.mk
+include vendor/haier/g151/BoardConfigVendor.mk
