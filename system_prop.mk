@@ -21,7 +21,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Display
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.sf.lcd_density=320
+    ro.sf.lcd_density=240
 
 # Factory Reset Protection
 PRODUCT_PROPERTY_OVERRIDES += \
