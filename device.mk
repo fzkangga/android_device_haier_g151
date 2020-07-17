@@ -76,6 +76,10 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/gps/izat.conf:system/etc/izat.conf \
     $(LOCAL_PATH)/gps/sap.conf:system/etc/sap.conf
 
+# IMS
+PRODUCT_PACKAGES += \
+    ims-ext-common
+
 # Init scripts
 PRODUCT_PACKAGES += \
     fstab.qcom \
@@ -127,6 +131,13 @@ PRODUCT_COPY_FILES += \
 
 # System Properties
 $(call inherit-product, device/haier/g151/system_prop.mk)
+
+# Telephony
+PRODUCT_PACKAGES += \
+    qti-telephony-common
+
+PRODUCT_BOOT_JARS += \
+    telephony-ext
 
 # USB ID
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
