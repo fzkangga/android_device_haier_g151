@@ -15,6 +15,9 @@
 
 $(call inherit-product, device/haier/g151/full_g151.mk)
 
+# Inherit common Android Go configuration.
+$(call inherit-product, build/target/product/go_defaults.mk)
+
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/lineage/config/common_mini_phone.mk)
 
