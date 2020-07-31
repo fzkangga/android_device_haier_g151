@@ -14,5 +14,6 @@
 # limitations under the License.
 
 PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/aosip_g151.mk \
     $(LOCAL_DIR)/lineage_g151.mk \
     $(LOCAL_DIR)/rr_g151.mk
