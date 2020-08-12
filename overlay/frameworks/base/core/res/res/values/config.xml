@@ -201,6 +201,10 @@
          provisioning, availability etc -->
     <bool name="config_carrier_vt_available">true</bool>
 
+    <!-- Boolean indicating whether the HWC setColorTransform function can be performed efficiently
+   in hardware. -->
+    <bool name="config_setColorTransformAccelerated">true</bool>
+
     <!-- Default list of files pinned by the Pinner Service -->
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
         <item>"/system/framework/arm/boot-framework.oat"</item>
