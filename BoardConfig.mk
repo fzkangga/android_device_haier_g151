@@ -15,10 +15,8 @@
 # limitations under the License.
 #
 
-FORCE_32_BIT := true
-
-# Inherit from msm8916-common
-include device/cyanogen/msm8916-common/BoardConfigCommon.mk
+# Inherit from msm8909-common
+include device/haier/msm8909-common/BoardConfigCommon.mk
 
 DEVICE_PATH := device/haier/g151
 
