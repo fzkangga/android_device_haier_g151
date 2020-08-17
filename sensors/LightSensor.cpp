@@ -256,31 +256,25 @@ int LightSensor::readEvents(sensors_event_t* data, int count)
 				mPendingEvent.light = convertEvent(event->value);
 			}
 		} else if (type == EV_SYN) {
-			switch ( event->code ){
+			switch ( event->code ) {
 				case SYN_TIME_SEC:
-					{
-						mUseAbsTimeStamp = true;
-						report_time = event->value*1000000000LL;
-					}
-				break;
+					mUseAbsTimeStamp = true;
+					report_time = event->value*1000000000LL;
+					break;
 				case SYN_TIME_NSEC:
-					{
-						mUseAbsTimeStamp = true;
-						mPendingEvent.timestamp = report_time+event->value;
-					}
-				break;
+					mUseAbsTimeStamp = true;
+					mPendingEvent.timestamp = report_time+event->value;
+					break;
 				case SYN_REPORT:
-					{
-						if(mUseAbsTimeStamp != true) {
-							mPendingEvent.timestamp = timevalToNano(event->time);
-							}
-						if (mEnabled) {
-							*data++ = mPendingEvent;
-							count--;
-							numEventReceived++;
-							}
+					if(mUseAbsTimeStamp != true) {
+						mPendingEvent.timestamp = timevalToNano(event->time);
 					}
-				break;
+					if (mEnabled) {
+						*data++ = mPendingEvent;
+						count--;
+						numEventReceived++;
+					}
+					break;
 			}
 		} else {
 			ALOGE("LightSensor: unknown event (type=%d, code=%d)",
