@@ -47,8 +47,8 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/mixer_paths_skue.xml:system/vendor/etc/mixer_paths_skue.xml
 
 # Boot animation
-TARGET_SCREEN_HEIGHT := 1280
-TARGET_SCREEN_WIDTH := 720
+TARGET_SCREEN_HEIGHT := 854
+TARGET_SCREEN_WIDTH := 480
 TARGET_BOOTANIMATION_HALF_RES := true
 
 # Camera
