@@ -150,5 +150,5 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libwpa_client
 
-# Inherit the rest from msm8916-common
-$(call inherit-product, device/cyanogen/msm8916-common/msm8916.mk)
+# Inherit the rest from msm8909-common
+$(call inherit-product, device/haier/msm8909-common/msm8909.mk)
