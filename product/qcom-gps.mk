@@ -1,6 +1,6 @@
 # GPS
 PRODUCT_PACKAGES += \
-    gps.msm8916
+    gps.msm8909
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/gps/flp.conf:system/etc/flp.conf \
