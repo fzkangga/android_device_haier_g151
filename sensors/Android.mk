@@ -1,4 +1,4 @@
-ifeq ($(TARGET_DEVICE),wt88047)
+ifeq ($(TARGET_DEVICE),g151)
 
 LOCAL_PATH := $(call my-dir)
 

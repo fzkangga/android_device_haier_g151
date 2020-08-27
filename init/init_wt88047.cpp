@@ -69,7 +69,7 @@ void init_target_properties()
     std::string buf;
 
     std::string product = property_get("ro.product.name");
-    if (product.find("wt88047") == std::string::npos)
+    if (product.find("g151") == std::string::npos)
         return;
 
     fin.open("/proc/cmdline");
