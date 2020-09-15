@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$(call inherit-product, device/smartfren/rendang/full_rendang.mk)
+$(call inherit-product, device/haier/g151/full_g151.mk)
 
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/cm/config/common_full_phone.mk)
 
 # Must define platform variant before including any common things
-TARGET_BOARD_PLATFORM_VARIANT := msm8916
+TARGET_BOARD_PLATFORM_VARIANT := msm8909
 
-PRODUCT_NAME := lineage_rendang
-BOARD_VENDOR := smartfren
-PRODUCT_DEVICE := rendang
+PRODUCT_NAME := lineage_g151
+BOARD_VENDOR := haier
+PRODUCT_DEVICE := g151
 
 PRODUCT_GMS_CLIENTID_BASE := android-haier
 
-TARGET_VENDOR_PRODUCT_NAME := G36C1H
-TARGET_VENDOR_DEVICE_NAME := G36C1H
-PRODUCT_BUILD_PROP_OVERRIDES += TARGET_DEVICE=G36C1H PRODUCT_NAME=G36C1H
+TARGET_VENDOR_PRODUCT_NAME := A16C3H
+TARGET_VENDOR_DEVICE_NAME := A16C3H
+PRODUCT_BUILD_PROP_OVERRIDES += TARGET_DEVICE=A16C3H PRODUCT_NAME=A16C3H

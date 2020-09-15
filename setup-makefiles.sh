@@ -18,8 +18,8 @@
 
 set -e
 
-DEVICE=rendang
-VENDOR=smartfren
+DEVICE=g151
+VENDOR=haier
 
 INITIAL_COPYRIGHT_YEAR=2015
 

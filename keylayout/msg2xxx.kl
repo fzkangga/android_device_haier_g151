@@ -14,6 +14,6 @@
 # limitations under the License.
 #
 
-key 580   APP_SWITCH   VIRTUAL
+key 139   APP_SWITCH   VIRTUAL
 key 172   HOME         VIRTUAL
 key 158   BACK         VIRTUAL

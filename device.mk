@@ -53,11 +53,18 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/acdb/QRD_Speaker_cal.acdb:system/etc/acdbdata/QRD/QRD_Speaker_cal.acdb \
     $(LOCAL_PATH)/audio/audio_platform_info.xml:system/etc/audio_platform_info.xml \
     $(LOCAL_PATH)/audio/audio_policy.conf:system/etc/audio_policy.conf \
-    $(LOCAL_PATH)/audio/mixer_paths.xml:system/etc/mixer_paths_qrd_skui.xml
+    $(LOCAL_PATH)/audio/mixer_paths_qrd_skuh.xml:system/etc/mixer_paths_qrd_skuh.xml \
+    $(LOCAL_PATH)/audio/mixer_paths_qrd_skui.xml:system/etc/mixer_paths_qrd_skui.xml \
+    $(LOCAL_PATH)/audio/mixer_paths.xml:system/etc/mixer_paths.xml \
+    $(LOCAL_PATH)/audio/mixer_paths_msm8909_pm8916.xml:system/etc/mixer_paths_msm8909_pm8916.xml \
+    $(LOCAL_PATH)/audio/mixer_paths_skua.xml:system/etc/mixer_paths_skua.xml \
+    $(LOCAL_PATH)/audio/mixer_paths_skuc.xml:system/etc/mixer_paths_skuc.xml \
+    $(LOCAL_PATH)/audio/mixer_paths_msm8909_x20_g151_pm8916.xml:system/etc/mixer_paths_msm8909_x20_g151_pm8916.xml
+    $(LOCAL_PATH)/audio/mixer_paths_skue.xml:system/etc/mixer_paths_skue.xml
 
 # Camera
 PRODUCT_PACKAGES += \
-    camera.msm8916 \
+    camera.msm8909 \
     libmm-qcamera \
     Snap
 
@@ -74,7 +81,7 @@ ADDITIONAL_DEFAULT_PROPERTIES += \
 
 # GPS
 PRODUCT_PACKAGES += \
-    gps.msm8916
+    gps.msm8909
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/gps/flp.conf:system/etc/flp.conf \
@@ -96,7 +103,7 @@ PRODUCT_COPY_FILES += \
 
 # Lights
 PRODUCT_PACKAGES += \
-    lights.msm8916
+    lights.msm8909
 
 # Media
 PRODUCT_COPY_FILES += \
@@ -106,7 +113,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     calmodule.cfg \
     libcalmodule_memsic \
-    sensors.msm8916
+    sensors.msm8909
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/spn-conf.xml:system/etc/spn-conf.xml
@@ -117,4 +124,4 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/wifi/WCNSS_qcom_wlan_nv.bin:system/etc/firmware/wlan/prima/WCNSS_qcom_wlan_nv.bin
 
 # Call the proprietary setup
-$(call inherit-product, vendor/smartfren/rendang/rendang-vendor.mk)
+$(call inherit-product, vendor/haier/g151/g151-vendor.mk)
