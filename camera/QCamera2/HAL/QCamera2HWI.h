@@ -443,7 +443,6 @@ private:
                 1 : mParameters.getNumOfSnapshots());
     };
     bool isLongshotEnabled() { return mLongshotEnabled; };
-    bool isLongshotSnapLimited() { return mParameters.isLongshotSnapsLimited(); };
     uint8_t getBufNumRequired(cam_stream_type_t stream_type);
     bool needFDMetadata(qcamera_ch_type_enum_t channel_type);
     bool removeSizeFromList(cam_dimension_t* size_list, size_t length,
@@ -529,6 +528,8 @@ private:
     uint32_t          mCameraId;
     mm_camera_vtbl_t *mCameraHandle;
     bool mCameraOpened;
+    // This flag will indicate whether camera is opened or not
+    static unsigned int mCameraSessionActive;
 
     preview_stream_ops_t *mPreviewWindow;
     QCameraParameters mParameters;
@@ -542,7 +543,6 @@ private:
     void                          *mCallbackCookie;
 
     QCameraStateMachine m_stateMachine;   // state machine
-    bool m_smThreadActive;
     QCameraPostProcessor m_postprocessor; // post processor
     QCameraThermalAdapter &m_thermalAdapter;
     QCameraCbNotifier m_cbNotifier;
@@ -655,6 +655,8 @@ private:
     bool mPreviewFrameSkipValid;
     cam_frame_idx_range_t mPreviewFrameSkipIdxRange;
     int32_t mNumPreviewFaces;
+    nsecs_t mLastAFScanTime;
+    nsecs_t mLastCaptureTime;
     bool mAdvancedCaptureConfigured;
     bool mFPSReconfigure;
    //ts add for makeup
