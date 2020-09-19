@@ -391,6 +391,7 @@ private:
     int32_t processAWBUpdate(cam_awb_params_t &awb_params);
     int32_t processFocusPositionInfo(cam_focus_pos_info_t &cur_pos_info);
     int32_t processAEInfo(cam_ae_params_t &ae_params);
+    int32_t processFrameIDReset(uint32_t frame_id);
 
     int32_t sendEvtNotify(int32_t msg_type, int32_t ext1, int32_t ext2);
     int32_t sendDataNotify(int32_t msg_type,
@@ -443,6 +444,7 @@ private:
                 1 : mParameters.getNumOfSnapshots());
     };
     bool isLongshotEnabled() { return mLongshotEnabled; };
+    bool isLongshotSnapLimited() { return mParameters.isLongshotSnapsLimited(); };
     uint8_t getBufNumRequired(cam_stream_type_t stream_type);
     bool needFDMetadata(qcamera_ch_type_enum_t channel_type);
     bool removeSizeFromList(cam_dimension_t* size_list, size_t length,
@@ -528,8 +530,6 @@ private:
     uint32_t          mCameraId;
     mm_camera_vtbl_t *mCameraHandle;
     bool mCameraOpened;
-    // This flag will indicate whether camera is opened or not
-    static unsigned int mCameraSessionActive;
 
     preview_stream_ops_t *mPreviewWindow;
     QCameraParameters mParameters;
@@ -543,6 +543,7 @@ private:
     void                          *mCallbackCookie;
 
     QCameraStateMachine m_stateMachine;   // state machine
+    bool m_smThreadActive;
     QCameraPostProcessor m_postprocessor; // post processor
     QCameraThermalAdapter &m_thermalAdapter;
     QCameraCbNotifier m_cbNotifier;
@@ -568,7 +569,6 @@ private:
     // and beforeany focus callback/cancel_focus happens. This flag is not an indication
     // of whether lens is moving or not.
     bool m_bAutoFocusRunning;
-    cam_autofocus_state_t m_currentFocusState;
 
     power_module_t *m_pPowerModule;   // power module
 
@@ -655,8 +655,6 @@ private:
     bool mPreviewFrameSkipValid;
     cam_frame_idx_range_t mPreviewFrameSkipIdxRange;
     int32_t mNumPreviewFaces;
-    nsecs_t mLastAFScanTime;
-    nsecs_t mLastCaptureTime;
     bool mAdvancedCaptureConfigured;
     bool mFPSReconfigure;
    //ts add for makeup
