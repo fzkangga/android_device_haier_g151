@@ -2903,6 +2903,9 @@ int32_t QCameraStateMachine::procEvtPreviewPicTakingState(qcamera_sm_evt_enum_t 
             case QCAMERA_INTERNAL_EVT_FOCUS_POS_UPDATE:
                 rc = m_parent->processFocusPositionInfo(internal_evt->focus_pos);
                 break;
+            case QCAMERA_INTERNAL_EVT_RESET_FRAME_ID:
+                rc = m_parent->processFrameIDReset(internal_evt->reset_frame_idx);
+                break;
             default:
                 break;
             }
@@ -2918,7 +2921,10 @@ int32_t QCameraStateMachine::procEvtPreviewPicTakingState(qcamera_sm_evt_enum_t 
                         if(!m_parent->m_postprocessor.getMultipleStages()) {
                             m_parent->m_postprocessor.setMultipleStages(true);
                         }
-                        m_parent->playShutter();
+                        if (!m_parent->isLongshotSnapLimited() &&
+                            !m_parent->isCaptureShutterEnabled()) {
+                            m_parent->playShutter();
+                        }
                     }
                 }
                 break;
@@ -2993,26 +2999,6 @@ bool QCameraStateMachine::isPreviewRunning()
     case QCAMERA_SM_STATE_VIDEO_PIC_TAKING:
     case QCAMERA_SM_STATE_PREVIEW_PIC_TAKING:
     case QCAMERA_SM_STATE_PREPARE_SNAPSHOT:
-    case QCAMERA_SM_STATE_PREVIEW_READY:
-        return true;
-    default:
-        return false;
-    }
-}
-
-/*===========================================================================
- * FUNCTION   : isPreviewReady
- *
- * DESCRIPTION: check if preview is in ready state.
- *
- * PARAMETERS : None
- *
- * RETURN     : true -- preview is in ready state
- *              false -- preview is stopped
- *==========================================================================*/
-bool QCameraStateMachine::isPreviewReady()
-{
-    switch (m_state) {
     case QCAMERA_SM_STATE_PREVIEW_READY:
         return true;
     default:

@@ -491,12 +491,13 @@ bool QCamera2HardwareInterface::TsMakeupProcess(mm_camera_buf_def_t *pFrame,
     if (pStream == NULL || pFrame == NULL || pMakeupOutBuf == NULL) {
         bRet = false;
         CDBG_HIGH("%s pStream == NULL || pFrame == NULL || pMakeupOutBuf == NULL",__func__);
+        return bRet;
     }
     pthread_mutex_lock(&m_parm_lock);
     const char* pch_makeup_enable = mParameters.get(QCameraParameters::KEY_TS_MAKEUP);
     pthread_mutex_unlock(&m_parm_lock);
     if (pch_makeup_enable == NULL) {
-        CDBG_HIGH("%s pch_makeup_enable = null",__func__);
+        CDBG("%s pch_makeup_enable = null",__func__);
         return bRet = false;
     }
     bool enableMakeUp = (strcmp(pch_makeup_enable,"On") == 0)&& faceRect.left > -1 ;
@@ -1128,14 +1129,14 @@ void QCamera2HardwareInterface::video_stream_cb_routine(mm_camera_super_buf_t *s
        CDBG_HIGH("[KPI Perf] %s : PROFILE_FIRST_RECORD_FRAME", __func__);
        pme->m_bRecordStarted = false ;
     }
-    ALOGD("%s: Stream(%d), Timestamp: %ld %ld",
+    CDBG("%s: Stream(%d), Timestamp: %ld %ld",
           __func__,
           frame->stream_id,
           frame->ts.tv_sec,
           frame->ts.tv_nsec);
     nsecs_t timeStamp;
     timeStamp = nsecs_t(frame->ts.tv_sec) * 1000000000LL + frame->ts.tv_nsec;
-    ALOGD("Send Video frame to services/encoder TimeStamp : %lld", timeStamp);
+    CDBG("Send Video frame to services/encoder TimeStamp : %lld", timeStamp);
     videoMemObj = (QCameraVideoMemory *)frame->mem_info;
     camera_memory_t *video_mem = NULL;
     if (NULL != videoMemObj) {
@@ -1435,6 +1436,26 @@ void QCamera2HardwareInterface::metadata_stream_cb_routine(mm_camera_super_buf_t
     mm_camera_buf_def_t *frame = super_frame->bufs[0];
     cam_metadata_info_t *pMetaData = (cam_metadata_info_t *)frame->buffer;
 
+    if (pMetaData->is_frame_id_reset) {
+        // process frame ID reset
+        qcamera_sm_internal_evt_payload_t *payload =
+            (qcamera_sm_internal_evt_payload_t *)malloc(sizeof(qcamera_sm_internal_evt_payload_t));
+        if (NULL != payload) {
+            memset(payload, 0, sizeof(qcamera_sm_internal_evt_payload_t));
+            payload->evt_type = QCAMERA_INTERNAL_EVT_RESET_FRAME_ID;
+            // Reset the frame ID to 1
+            payload->reset_frame_idx = 1;
+            int32_t rc = pme->processEvt(QCAMERA_SM_EVT_EVT_INTERNAL, payload);
+            if (rc != NO_ERROR) {
+                ALOGE("%s: processEvt reset frame id failed", __func__);
+                free(payload);
+                payload = NULL;
+            }
+        } else {
+            ALOGE("%s: No memory for frame id reset qcamera_sm_internal_evt_payload_t", __func__);
+        }
+    }
+
     if (pMetaData->is_preview_frame_skip_valid) {
         pme->mPreviewFrameSkipValid = 1;
         pme->mPreviewFrameSkipIdxRange = pMetaData->preview_frame_skip_idx_range;
@@ -1511,24 +1532,12 @@ void QCamera2HardwareInterface::metadata_stream_cb_routine(mm_camera_super_buf_t
                 ALOGE("%s: processEvt focus failed", __func__);
                 free(payload);
                 payload = NULL;
-        } else if (pMetaData->focus_data.focus_state == CAM_AF_SCANNING) {
-	   pme->mLastAFScanTime = systemTime();
+
             }
         } else {
             ALOGE("%s: No memory for focus qcamera_sm_internal_evt_payload_t", __func__);
         }
-        } else if (pme->m_currentFocusState == CAM_AF_SCANNING) {
-          /* Recover if passive AF has stalled after photo capture */
-        if (pme->mLastAFScanTime && pme->mLastCaptureTime) {
-              nsecs_t now = systemTime();
-              nsecs_t scanDelta = now - pme->mLastAFScanTime;
-              nsecs_t captureDelta = now - pme->mLastCaptureTime;
-	      if (captureDelta < ms2ns(1000) && scanDelta > ms2ns(200)) {
-	      pme->sendEvtNotify(CAMERA_MSG_FOCUS_MOVE, false, 0);
-     	      pme->mLastAFScanTime = 0;
-	}
-	}
-   }
+    }
 
     if (pMetaData->is_crop_valid) {
         if (pMetaData->crop_data.num_of_streams > MAX_NUM_STREAMS) {
@@ -1801,7 +1810,7 @@ void QCamera2HardwareInterface::dumpJpegToFile(const void *data,
                 snprintf(buf, sizeof(buf),
                          "/data/misc/camera/%d_%d.jpg", mDumpFrmCnt, index);
                 if (true == m_bIntEvtPending) {
-                    strncpy(m_BackendFileName, buf, sizeof(buf));
+                    strlcpy(m_BackendFileName, buf, sizeof(buf));
                     mBackendFileSize = size;
                 }
 
