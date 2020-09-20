@@ -22,14 +22,6 @@ DEVICE_PATH := device/haier/g151
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := MSM8909
 
-# Kernel
-BOARD_DTBTOOL_ARGS := -2
-BOARD_KERNEL_IMAGE_NAME := zImage
-BOARD_KERNEL_SEPARATED_DT := true
-TARGET_KERNEL_SOURCE := kernel/lineage/msm8916
-TARGET_KERNEL_CONFIG := lineageos_g151_defconfig
-BOARD_KERNEL_CMDLINE += phy-msm-usb.floated_charger_enable=1
-
 # Bluetooth
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(DEVICE_PATH)/bluetooth
 
@@ -37,12 +29,27 @@ BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := $(DEVICE_PATH)/bluetooth
 TARGET_USE_VENDOR_CAMERA_EXT := true
 USE_DEVICE_SPECIFIC_CAMERA := true
 
+# Dex
+ifeq ($(HOST_OS),linux)
+  ifeq ($(TARGET_BUILD_VARIANT),user)
+    WITH_DEXPREOPT_COMP ?= false
+  endif
+endif
+
 # Flags
 BOARD_NO_SECURE_DISCARD := true
 
 # GPS
 USE_DEVICE_SPECIFIC_GPS := true
 TARGET_NO_RPC := true
+
+# Kernel
+BOARD_DTBTOOL_ARGS := -2
+BOARD_KERNEL_IMAGE_NAME := zImage
+BOARD_KERNEL_SEPARATED_DT := true
+TARGET_KERNEL_SOURCE := kernel/lineage/msm8916
+TARGET_KERNEL_CONFIG := lineageos_g151_defconfig
+BOARD_KERNEL_CMDLINE += phy-msm-usb.floated_charger_enable=1
 
 # Lights
 TARGET_PROVIDES_LIBLIGHT := true
