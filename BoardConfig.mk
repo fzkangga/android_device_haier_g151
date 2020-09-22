@@ -68,7 +68,12 @@ BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
 # Recovery
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.qcom
 
+# System Prop
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
+# SELinux
+BOARD_SEPOLICY_DIRS += \
+    $(DEVICE_PATH)/sepolicy
+	
 # inherit from the proprietary version
 include vendor/haier/g151/BoardConfigVendor.mk
