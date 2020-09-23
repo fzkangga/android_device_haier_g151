@@ -1315,6 +1315,8 @@ int32_t QCameraParameters::setPictureSize(const QCameraParameters& params)
                 // set the new value
                 CDBG_HIGH("%s: Requested picture size %d x %d", __func__, width, height);
                 CameraParameters::setPictureSize(width, height);
+                // Update View angles based on Picture Aspect ratio
+                updateViewAngles();
                 return NO_ERROR;
             }
         }
@@ -1334,6 +1336,8 @@ int32_t QCameraParameters::setPictureSize(const QCameraParameters& params)
             snprintf(val, sizeof(val), "%dx%d", width, height);
             CDBG_HIGH("%s: picture size requested %s", __func__, val);
             updateParamEntry(KEY_PICTURE_SIZE, val);
+            // Update View angles based on Picture Aspect ratio
+            updateViewAngles();
             return NO_ERROR;
         }
     }
