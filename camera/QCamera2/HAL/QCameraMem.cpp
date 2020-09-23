@@ -580,31 +580,16 @@ int QCameraMemoryPool::findBufferLocked(
     }
 
     List<struct QCameraMemory::QCameraMemInfo>::iterator it = mPools[streamType].begin();
-    if (streamType == CAM_STREAM_TYPE_OFFLINE_PROC) {
-        for( ; it != mPools[streamType].end() ; it++) {
-            if( ((*it).size == size) &&
-                    ((*it).heap_id == heap_id) &&
-                    ((*it).cached == cached) ) {
-                memInfo = *it;
-                ALOGE("%s : Found buffer %lx size %d",
-                        __func__, (unsigned long)memInfo.handle, memInfo.size);
-                mPools[streamType].erase(it);
-                rc = NO_ERROR;
-                break;
-            }
-        }
-    } else {
-        for( ; it != mPools[streamType].end() ; it++) {
-            if(((*it).size >= size) &&
-                    ((*it).heap_id == heap_id) &&
-                    ((*it).cached == cached) ) {
-                memInfo = *it;
-                ALOGE("%s : Found buffer %lx size %d",
-                        __func__, (unsigned long)memInfo.handle, memInfo.size);
-                mPools[streamType].erase(it);
-                rc = NO_ERROR;
-                break;
-            }
+    for( ; it != mPools[streamType].end() ; it++) {
+        if( ((*it).size >= size) &&
+            ((*it).heap_id == heap_id) &&
+            ((*it).cached == cached) ) {
+            memInfo = *it;
+            ALOGE("%s : Found buffer %lx size %d",
+                    __func__, (unsigned long)memInfo.handle, memInfo.size);
+            mPools[streamType].erase(it);
+            rc = NO_ERROR;
+            break;
         }
     }
 
@@ -1390,16 +1375,27 @@ int QCameraVideoMemory::allocateMore(uint8_t count, size_t size)
  *==========================================================================*/
 void QCameraVideoMemory::deallocate()
 {
-    for (int i = 0; i < mMetaBufCount; i ++) {
-        native_handle_t *nh = mNativeHandle[i];
-        if (NULL != nh) {
-            if (native_handle_delete(nh)) {
-                ALOGE("Unable to delete native handle");
+    for (int i = 0; i < mBufferCount; i ++) {
+        media_metadata_buffer * packet =
+            (media_metadata_buffer *)mMetadata[i]->data;
+        if (NULL != packet) {
+#ifdef USE_MEDIA_EXTENSIONS
+            native_handle_t* nh = const_cast<native_handle_t *>(packet->pHandle);
+#else
+            native_handle_t* nh = const_cast<native_handle_t *>(packet->meta_handle);
+#endif
+            if (NULL != nh) {
+               if (native_handle_delete(nh)) {
+                   ALOGE("Unable to delete native handle");
+               }
             }
-        } else {
-            ALOGE("native handle not available");
+            else {
+               ALOGE("native handle not available");
+            }
         }
-        mNativeHandle[i] = NULL;
+        else {
+            ALOGE("packet not available");
+        }
         mMetadata[i]->release(mMetadata[i]);
         mMetadata[i] = NULL;
     }
