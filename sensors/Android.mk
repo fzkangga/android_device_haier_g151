@@ -13,7 +13,7 @@ else
   ifneq ($(filter msm8916 msm8909,$(TARGET_BOARD_PLATFORM)),)
     LOCAL_MODULE := sensors.$(TARGET_BOARD_PLATFORM)
   else
-    LOCAL_MODULE := sensors.msm8930
+    LOCAL_MODULE := sensors.msm8960
   endif
 endif
 
@@ -33,6 +33,13 @@ endif
 LOCAL_C_INCLUDES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
 LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 
+# Export calibration library needed dependency headers
+LOCAL_COPY_HEADERS_TO := sensors/inc
+LOCAL_COPY_HEADERS := 	\
+		CalibrationModule.h \
+		sensors_extension.h \
+		sensors.h
+
 LOCAL_SRC_FILES :=	\
 		sensors.cpp 			\
 		SensorBase.cpp			\
@@ -46,10 +53,16 @@ LOCAL_SRC_FILES :=	\
 		CalibrationManager.cpp \
 		NativeSensorManager.cpp \
 		VirtualSensor.cpp	\
-		sensors_XML.cpp
+		sensors_XML.cpp \
+		SignificantMotion.cpp
 
 LOCAL_C_INCLUDES += external/libxml2/include	\
-		    external/icu/icu4c/source/common
+
+ifeq ($(call is-platform-sdk-version-at-least,20),true)
+    LOCAL_C_INCLUDES += external/icu/icu4c/source/common
+else
+    LOCAL_C_INCLUDES += external/icu4c/common
+endif
 
 LOCAL_SHARED_LIBRARIES := liblog libcutils libdl libxml2 libutils
 
@@ -57,25 +70,14 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_SUFFIX := .a
-LOCAL_MODULE := CompassAlgo
-LOCAL_MODULE_CLASS := STATIC_LIBRARIES
-
-ifdef TARGET_2ND_ARCH
-LOCAL_SRC_FILES_32 := algo/memsic/CompassAlgo_32.a
-LOCAL_SRC_FILES_64 := algo/memsic/CompassAlgo.a
-LOCAL_MULTILIB := both
-else
-LOCAL_SRC_FILES := algo/memsic/CompassAlgo_32.a
-endif
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libcalmodule_memsic
+LOCAL_MODULE := libcalmodule_common
 LOCAL_SRC_FILES := \
-                  algo/memsic/memsic_wrapper.c
+		   algo/common/common_wrapper.c \
+		   algo/common/compass/AKFS_AOC.c \
+		   algo/common/compass/AKFS_Device.c \
+		   algo/common/compass/AKFS_Direction.c \
+		   algo/common/compass/AKFS_VNorm.c
 
-LOCAL_STATIC_LIBRARIES := CompassAlgo
 LOCAL_SHARED_LIBRARIES := liblog libcutils
 LOCAL_MODULE_TAGS := optional
 

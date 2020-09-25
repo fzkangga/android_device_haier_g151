@@ -116,7 +116,7 @@ PRODUCT_COPY_FILES += \
 # Sensor HAL
 PRODUCT_PACKAGES += \
     calmodule.cfg \
-    libcalmodule_memsic \
+    libcalmodule_common \
     sensors.msm8909
 
 PRODUCT_COPY_FILES += \
